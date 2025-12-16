@@ -1,0 +1,157 @@
+```css
+
+/* Moops Styles */
+.sub-page {
+    padding: var(--spacing-lg);
+    /* Nav spacing handled by parent/flex */
+    height: 100%;
+    overflow-y: auto;
+    background: var(--color-bg-dark);
+}
+
+.page-title {
+    margin-bottom: var(--spacing-lg);
+    font-size: 1.5rem;
+}
+
+.moops-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.moop-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    border: 1px solid transparent;
+    transition: all 0.2s;
+}
+
+.moop-card:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.moop-icon {
+    font-size: 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.moop-details {
+    flex: 1;
+}
+
+.moop-details h3 {
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+}
+
+.moop-meta {
+    display: flex;
+    gap: var(--spacing-md);
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+.moop-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-small-outline {
+    background: transparent;
+    border: 1px solid var(--color-primary);
+    color: var(--color-primary);
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    border-radius: var(--radius-full);
+}
+
+.fab-add {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    background: var(--color-secondary);
+    color: white;
+    padding: 12px 20px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(255, 165, 0, 0.4);
+    z-index: 100;
+}
+
+/* Create Form */
+.form-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.form-group label {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-main);
+    font-size: 1rem;
+}
+
+.form-textarea {
+    resize: none;
+    height: 100px;
+}
+
+.vibe-selector-mini {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.vibe-chip {
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-full);
+    font-size: 1.2rem;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.vibe-chip.selected {
+    background: rgba(1, 249, 198, 0.2);
+    border-color: var(--color-primary);
+}
+
+.btn-group {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+}

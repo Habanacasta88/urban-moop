@@ -1,0 +1,89 @@
+.bottom-sheet {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: var(--color-bg-dark);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    padding: var(--spacing-md);
+    transform: translateY(100%);
+    transition: transform 0.3s ease-out;
+    z-index: 2000;
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.5);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+.bottom-sheet.open {
+    transform: translateY(0);
+}
+
+.sheet-handle {
+    width: 40px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-full);
+    margin: 0 auto var(--spacing-md);
+    cursor: pointer;
+}
+
+.sheet-header {
+    text-align: center;
+    margin-bottom: var(--spacing-md);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: var(--spacing-md);
+}
+
+.sheet-subtitle {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+.sheet-section {
+    margin-bottom: var(--spacing-md);
+}
+
+.sheet-section h3 {
+    font-size: 1rem;
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-text-muted);
+}
+
+.moop-card-mini,
+.promo-card-mini {
+    background: rgba(255, 255, 255, 0.05);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-sm);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.moop-info h4,
+.promo-card-mini h4 {
+    font-size: 0.95rem;
+    margin-bottom: 2px;
+}
+
+.moop-info p,
+.promo-card-mini p {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+.btn-small {
+    font-size: 0.8rem;
+    padding: 4px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.btn-explore {
+    width: 100%;
+    padding: var(--spacing-md);
+    font-weight: 700;
+    margin-top: var(--spacing-sm);
+    border: none;
+    border-radius: var(--radius-full);
+}

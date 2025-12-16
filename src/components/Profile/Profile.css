@@ -1,0 +1,86 @@
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.avatar-large {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--color-primary);
+}
+
+.profile-info h2 {
+    font-size: 1.5rem;
+    margin-bottom: 4px;
+}
+
+.profile-info p {
+    color: var(--color-secondary);
+    font-weight: 600;
+}
+
+.profile-section {
+    margin-bottom: var(--spacing-xl);
+}
+
+.profile-section h3 {
+    font-size: 1.1rem;
+    margin-bottom: var(--spacing-md);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 8px;
+}
+
+.list-item {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-md);
+    background: rgba(255, 255, 255, 0.05);
+    margin-bottom: 8px;
+    border-radius: var(--radius-sm);
+}
+
+.badge {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+.reward-card {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: rgba(255, 255, 255, 0.05);
+    margin-bottom: 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+}
+
+.reward-card.unlocked {
+    border-color: var(--color-primary);
+}
+
+.reward-card.locked {
+    opacity: 0.6;
+}
+
+.settings-row {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-icon-text {
+    background: transparent;
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
