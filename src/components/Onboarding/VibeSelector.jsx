@@ -41,7 +41,7 @@ const VibeSelector = ({ onNext, onBack, data }) => {
                 Elige al menos una. Ajustaremos tu mapa como si fuera un radar social.
             </p>
 
-            <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4 w-full max-w-md mx-auto">
                 {vibeOptions.map((vibe) => (
                     <button
                         key={vibe.id}
