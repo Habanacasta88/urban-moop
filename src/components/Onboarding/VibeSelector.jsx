@@ -41,22 +41,22 @@ const VibeSelector = ({ onNext, onBack, data }) => {
                 Elige al menos una. Ajustaremos tu mapa como si fuera un radar social.
             </p>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4 w-full max-w-md mx-auto">
+            <div className="grid grid-cols-3 gap-3 mb-4 w-full max-w-md mx-auto">
                 {vibeOptions.map((vibe) => (
                     <button
                         key={vibe.id}
                         onClick={() => toggleVibe(vibe.id)}
-                        className={`p-4 rounded-3xl border transition-all flex flex-col items-center justify-center gap-3 aspect-square ${selectedVibes.includes(vibe.id)
+                        className={`p-2 rounded-3xl border transition-all flex flex-col items-center justify-center gap-2 aspect-square ${selectedVibes.includes(vibe.id)
                             ? 'bg-indigo-600 border-indigo-500 shadow-lg shadow-indigo-500/30 ring-1 ring-white/20'
                             : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:scale-[1.02]'
                             }`}
                     >
-                        <span className="text-4xl filter drop-shadow-md">{vibe.icon}</span>
+                        <span className="text-3xl filter drop-shadow-md">{vibe.icon}</span>
                         <div className="text-center">
-                            <span className={`block font-bold text-sm ${selectedVibes.includes(vibe.id) ? 'text-white' : 'text-gray-900'}`}>
+                            <span className={`block font-bold text-xs ${selectedVibes.includes(vibe.id) ? 'text-white' : 'text-gray-900'}`}>
                                 {vibe.label}
                             </span>
-                            <span className={`text-[10px] font-medium uppercase tracking-wider ${selectedVibes.includes(vibe.id) ? 'text-indigo-200' : 'text-gray-500'}`}>
+                            <span className={`text-[9px] font-medium uppercase tracking-wider ${selectedVibes.includes(vibe.id) ? 'text-indigo-200' : 'text-gray-500'}`}>
                                 {vibe.desc}
                             </span>
                         </div>
