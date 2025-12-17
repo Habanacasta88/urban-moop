@@ -28,39 +28,34 @@ export const RadarHeader = ({ onFilterChange, activeFilter, events = [] }) => {
     }, [events]);
 
     return (
-        <div className="flex flex-col gap-2 pointer-events-auto">
-            {/* 1. TOP BAR (Logo + Location) */}
-            <div className="flex items-center justify-between pointer-events-auto mb-2">
-                <div className="flex gap-2 items-center">
-                    {/* Logo */}
-                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-lg border border-white/50 overflow-hidden">
-                        <img src="/logo_full.png" alt="Logo" className="w-full h-full object-contain p-1" />
-                    </div>
-
-                    {/* Location Selector */}
-                    <button
-                        onClick={() => openVibeCheck('zone', 'sabadell-center', 'Centro de Sabadell')}
-                        className="bg-white/90 backdrop-blur-md pl-3 pr-4 py-1.5 rounded-xl shadow-sm border border-white/50 flex flex-col items-start transition-transform active:scale-95"
-                    >
-                        <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">AHORA EN:</span>
-                        <div className="flex items-center gap-1 text-sm font-black text-gray-900 leading-none">
-                            Sabadell <ChevronLeft size={10} className="-rotate-90 text-gray-400" />
-                        </div>
-                    </button>
-                </div>
+        <div className="flex items-start gap-2 pointer-events-auto flex-wrap">
+            {/* Logo */}
+            <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-lg border border-white/50 overflow-hidden shrink-0">
+                <img src="/logo_full.png" alt="Logo" className="w-full h-full object-contain p-1" />
             </div>
 
-            {/* 2. RADAR NOTIFICATION (Animates Height) */}
-            <div className="relative pointer-events-auto" onClick={toggleExpand}>
+            {/* Location Selector */}
+            <button
+                onClick={() => openVibeCheck('zone', 'sabadell-center', 'Centro de Sabadell')}
+                className="bg-white/90 backdrop-blur-md pl-3 pr-4 py-1.5 rounded-xl shadow-sm border border-white/50 flex flex-col items-start transition-transform active:scale-95 shrink-0"
+            >
+                <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">AHORA EN:</span>
+                <div className="flex items-center gap-1 text-sm font-black text-gray-900 leading-none">
+                    Sabadell <ChevronLeft size={10} className="-rotate-90 text-gray-400" />
+                </div>
+            </button>
+
+            {/* RADAR NOTIFICATION */}
+            <div className="relative" onClick={toggleExpand}>
                 <AnimatePresence mode="wait">
                     {isExpanded ? (
                         <motion.div
                             key="expanded"
-                            initial={{ opacity: 0, y: -20, height: 0 }}
-                            animate={{ opacity: 1, y: 0, height: 'auto' }}
-                            exit={{ opacity: 0, y: -10, height: 0 }}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
                             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                            className="bg-white/95 backdrop-blur-xl rounded-2xl p-4 shadow-xl border border-white/60 overflow-hidden"
+                            className="bg-white/95 backdrop-blur-xl rounded-2xl p-4 shadow-xl border border-white/60 overflow-hidden absolute top-0 left-0 w-[240px] z-50 origin-top-left"
                         >
                             <div className="flex items-center gap-2 mb-3">
                                 <span className="relative flex h-3 w-3">
@@ -88,16 +83,16 @@ export const RadarHeader = ({ onFilterChange, activeFilter, events = [] }) => {
                     ) : (
                         <motion.div
                             key="collapsed"
-                            initial={{ opacity: 0, height: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, height: 'auto', scale: 1 }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="bg-white/90 backdrop-blur-md rounded-full px-4 py-2 shadow-lg border border-white/50 flex items-center gap-3 w-fit"
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            className="bg-white/90 backdrop-blur-md rounded-full px-3 py-2.5 shadow-lg border border-white/50 flex items-center gap-2 w-fit h-10"
                         >
-                            <span className="relative flex h-2 w-2">
+                            <span className="relative flex h-2 w-2 shrink-0">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
                             </span>
-                            <div className="text-[11px] font-medium text-gray-600 flex gap-3">
+                            <div className="text-[10px] font-medium text-gray-600 flex gap-2 whitespace-nowrap">
                                 <span><b>{stats.live}</b> LIVE</span>
                                 <span className="text-gray-300">•</span>
                                 <span><b>{stats.flash}</b> Flash</span>
@@ -108,6 +103,6 @@ export const RadarHeader = ({ onFilterChange, activeFilter, events = [] }) => {
                     )}
                 </AnimatePresence>
             </div>
-        </div>
+        </div >
     );
 };
