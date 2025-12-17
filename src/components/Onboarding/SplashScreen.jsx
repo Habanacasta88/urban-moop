@@ -2,7 +2,7 @@ import { motion } from 'motion/react';
 
 const SplashScreen = ({ onComplete }) => {
     return (
-        <div className="relative w-full h-screen bg-white overflow-hidden text-gray-900 flex flex-col items-center justify-end pb-12">
+        <div className="relative w-full h-[100dvh] bg-white overflow-hidden text-gray-900 flex flex-col items-center justify-end pb-[calc(24px+env(safe-area-inset-bottom))]">
             {/* Dynamic Background Image */}
             <div className="absolute inset-0 z-0">
                 <img
