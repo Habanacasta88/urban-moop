@@ -4,6 +4,7 @@ import { useActivity } from '../../context/ActivityContext';
 import { useState, useMemo } from 'react';
 
 // --- BLOCK 1: LIVE CARD (Action First) ---
+// --- BLOCK 1: LIVE CARD (Action First) ---
 export const LiveCard = ({ item, onClick }) => {
     const { savedItems, toggleSaveItem } = useActivity();
     const isSaved = useMemo(() => savedItems.some(i => String(i.id) === String(item.id)), [savedItems, item.id]);
@@ -14,7 +15,7 @@ export const LiveCard = ({ item, onClick }) => {
     };
 
     return (
-        <div onClick={onClick} className="relative w-full aspect-[4/3] rounded-3xl overflow-hidden mb-4 bg-white shadow-sm border border-gray-100 active:scale-95 transition-transform">
+        <div onClick={onClick} className="relative w-full aspect-[4/3] rounded-3xl overflow-hidden mb-4 bg-surface shadow-sm border border-border active:scale-95 transition-transform">
             <div className="absolute inset-0 h-3/4">
                 <ImageWithFallback src={item.imageUrl} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
@@ -29,7 +30,7 @@ export const LiveCard = ({ item, onClick }) => {
             {/* Content overlay on image */}
             <div className="absolute top-[50%] left-0 right-0 p-5 transform -translate-y-1/4">
                 <div className="flex items-center gap-2 mb-1">
-                    <span className="bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider animate-pulse">AHORA</span>
+                    <span className="bg-brand-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider animate-pulse">AHORA</span>
                     <span className="text-xs text-white/90 font-bold shadow-sm">{item.business?.name || 'Evento'}</span>
                 </div>
                 <h3 className="text-white font-black text-2xl leading-none shadow-sm mb-1">{item.title}</h3>
@@ -37,21 +38,23 @@ export const LiveCard = ({ item, onClick }) => {
             </div>
 
             {/* Bottom Action Bar (White bg) */}
-            <div className="absolute bottom-0 left-0 right-0 h-16 bg-white flex items-center justify-between px-5 border-t border-gray-50">
+            <div className="absolute bottom-0 left-0 right-0 h-16 bg-surface flex items-center justify-between px-5 border-t border-gray-50">
                 <div className="flex items-center gap-2">
                     <div className="flex -space-x-2">
                         {[1, 2, 3].map(i => (
                             <div key={i} className="w-6 h-6 rounded-full bg-gray-200 border border-white" />
                         ))}
                     </div>
-                    <div className="text-[10px] text-gray-500 font-bold">
-                        <span className="text-black">{item.attendees || 12} personas</span> van
+                    <div className="text-[10px] text-muted font-bold">
+                        <span className="text-text">{item.attendees || 12} personas</span> van
                     </div>
                 </div>
 
                 <button
                     onClick={handleInterest}
-                    className={`flex items-center gap-1.5 px-4 py-2 rounded-full font-bold text-xs transition-colors ${isSaved ? 'bg-green-100 text-green-700' : 'bg-black text-white'}`}
+                    className={`flex items-center gap-1.5 px-4 py-2 rounded-full font-bold text-xs transition-all ${isSaved
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-gradient-to-r from-brand-600 to-brand-300 text-white shadow-lg shadow-brand-500/30'}`}
                 >
                     {isSaved ? <Check size={14} /> : <Star size={14} fill={isSaved ? "currentColor" : "none"} />}
                     {isSaved ? 'Apuntado' : 'Me interesa'}
@@ -64,25 +67,25 @@ export const LiveCard = ({ item, onClick }) => {
 // --- BLOCK 2: SOCIAL CARD (Human Connection) ---
 export const SocialCard = ({ item, onClick }) => {
     return (
-        <div onClick={onClick} className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-gray-100 mb-3 shadow-sm active:bg-gray-50 transition-colors">
+        <div onClick={onClick} className="flex items-center gap-4 p-4 bg-surface rounded-2xl border border-border mb-3 shadow-sm active:bg-surface-2 transition-colors">
             {/* Avatar Cluster */}
             <div className="relative w-16 h-16 flex-shrink-0">
-                <ImageWithFallback src={item.creator?.avatar || item.business?.avatar} className="w-full h-full rounded-full object-cover border-2 border-white shadow-md z-10 relative" />
-                <div className="absolute -bottom-1 -right-1 bg-indigo-100 text-indigo-700 text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-white">
+                <ImageWithFallback src={item.creator?.avatar || item.business?.avatar} className="w-full h-full rounded-full object-cover border-2 border-surface shadow-md z-10 relative" />
+                <div className="absolute -bottom-1 -right-1 bg-brand-100 text-brand-700 text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-surface">
                     {item.vibe || '😌'}
                 </div>
             </div>
 
             <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Moop Social</span>
-                    <span className="text-[10px] font-bold text-indigo-500">• a {item.location?.distance}</span>
+                    <span className="text-[10px] font-bold text-muted uppercase tracking-wide">Moop Social</span>
+                    <span className="text-[10px] font-bold text-brand-500">• a {item.location?.distance}</span>
                 </div>
-                <h3 className="text-gray-900 font-bold text-lg leading-tight truncate">{item.title}</h3>
-                <p className="text-xs text-gray-500 truncate">con {item.creator?.name} y {item.attendees} más</p>
+                <h3 className="text-text font-bold text-lg leading-tight truncate">{item.title}</h3>
+                <p className="text-xs text-muted truncate">con {item.creator?.name} y {item.attendees} más</p>
             </div>
 
-            <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-300">
+            <div className="w-8 h-8 rounded-full bg-surface-2 flex items-center justify-center text-muted">
                 <ArrowRight size={16} />
             </div>
         </div>
@@ -122,7 +125,7 @@ export const FlashCard = ({ item, onClick }) => {
 // --- BLOCK 4: DISCOVER CARD (New / Editorial) ---
 export const DiscoverCard = ({ item, onClick }) => {
     return (
-        <div onClick={onClick} className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden mb-3 bg-gray-100 active:scale-95 transition-transform group">
+        <div onClick={onClick} className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden mb-3 bg-surface-2 active:scale-95 transition-transform group">
             <ImageWithFallback src={item.imageUrl} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
 

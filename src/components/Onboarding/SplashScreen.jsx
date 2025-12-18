@@ -50,7 +50,7 @@ const SplashScreen = ({ onComplete }) => {
                 <h1
                     className="text-4xl md:text-6xl font-black mb-4 leading-[0.95] tracking-tighter w-full max-w-sm mx-auto text-gray-900"
                 >
-                    Lo que pasa <br /><span className="text-indigo-600 text-5xl md:text-7xl block mt-1">HOY</span> <span className="block mt-1">a tu alrededor.</span>
+                    Lo que pasa <br /><span className="text-brand-600 text-5xl md:text-7xl block mt-1">HOY</span> <span className="block mt-1">a tu alrededor.</span>
                 </h1>
 
                 {/* Subtitle */}
@@ -59,7 +59,7 @@ const SplashScreen = ({ onComplete }) => {
                 >
                     Descubre cafés nuevos, planes inesperados y secretos del barrio sin perder tiempo.
                 </p>
-                <p className="text-indigo-600 font-bold text-sm mb-6 max-w-xs mx-auto">
+                <p className="text-brand-600 font-bold text-sm mb-6 max-w-xs mx-auto">
                     Moops = pequeñas quedadas reales cerca de ti.
                 </p>
 
@@ -74,7 +74,7 @@ const SplashScreen = ({ onComplete }) => {
                 {/* CTA Button */}
                 <button
                     onClick={onComplete}
-                    className="w-full max-w-xs bg-gray-900 text-white font-black py-4 rounded-2xl text-lg shadow-xl shadow-gray-900/10 transition-all flex items-center justify-center gap-3 hover:bg-gray-800 active:scale-95 mb-4"
+                    className="w-full max-w-xs bg-gradient-to-r from-brand-600 to-brand-300 text-white font-black py-4 rounded-full text-lg shadow-xl shadow-brand-500/30 transition-all flex items-center justify-center gap-3 active:scale-95 mb-4"
                 >
                     Empezar <span className="text-xl">👉</span>
                 </button>

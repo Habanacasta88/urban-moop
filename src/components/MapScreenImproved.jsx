@@ -168,7 +168,7 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
 
 
     return (
-        <div className="relative w-full h-[100dvh] bg-gray-100 overflow-hidden font-sf">
+        <div className="relative w-full h-[100dvh] bg-surface-2 overflow-hidden font-sf">
 
             {/* 1. Header & Filters (Z-Index 50) */}
             <div className="absolute top-0 left-0 right-0 z-50 p-4">
@@ -177,22 +177,22 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
                 {/* Search Bar */}
                 <div className="pointer-events-auto flex gap-3 mt-3">
                     <div className="relative flex-1 group">
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"><Search size={22} /></div>
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted"><Search size={22} /></div>
                         <input
                             type="text"
                             placeholder="¿Qué buscas hoy?"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full bg-white rounded-2xl py-3.5 pl-12 pr-4 shadow-xl shadow-indigo-500/5 border border-gray-100 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 placeholder:text-gray-400"
+                            className="w-full bg-surface rounded-2xl py-3.5 pl-12 pr-4 shadow-xl shadow-brand-500/5 border border-border text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 placeholder:text-muted text-text"
                         />
                         {searchQuery && (
-                            <button onClick={() => setSearchQuery('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"><X size={16} /></button>
+                            <button onClick={() => setSearchQuery('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted"><X size={16} /></button>
                         )}
                     </div>
                     {/* Filters Toggle */}
                     <button
                         onClick={() => setIsFilterModalOpen(true)}
-                        className="w-12 bg-white rounded-2xl shadow-xl shadow-indigo-500/5 border border-gray-100 flex items-center justify-center text-gray-500 active:scale-95 transition-transform"
+                        className="w-12 bg-surface rounded-2xl shadow-xl shadow-brand-500/5 border border-border flex items-center justify-center text-muted active:scale-95 transition-transform"
                     >
                         <List size={22} />
                     </button>
@@ -204,7 +204,7 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
                         {/* "Ahora" (Live) - DEFAULT & FIRST */}
                         <button
                             onClick={() => setActiveFilter('live')}
-                            className={`px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition-all flex items-center gap-1.5 ${activeFilter === 'live' ? 'bg-black text-white scale-105' : 'bg-white text-gray-900 border border-gray-100 text-red-600'}`}
+                            className={`px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition-all flex items-center gap-1.5 ${activeFilter === 'live' ? 'bg-brand-600 text-white scale-105' : 'bg-surface text-text border border-border text-brand-600'}`}
                         >
                             🔥 Ahora
                         </button>
@@ -212,7 +212,7 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
                         {/* "Moops" */}
                         <button
                             onClick={() => setActiveFilter('moop')}
-                            className={`px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition-all flex items-center gap-1.5 ${activeFilter === 'moop' ? 'bg-black text-white scale-105' : 'bg-white text-gray-900 border border-gray-100 text-indigo-600'}`}
+                            className={`px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition-all flex items-center gap-1.5 ${activeFilter === 'moop' ? 'bg-brand-600 text-white scale-105' : 'bg-surface text-text border border-border text-brand-400'}`}
                         >
                             👥 Moops
                         </button>
@@ -220,7 +220,7 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
                         {/* "Todo" - Moved to 3rd */}
                         <button
                             onClick={() => setActiveFilter('todo')}
-                            className={`px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition-all flex items-center gap-1.5 ${activeFilter === 'todo' ? 'bg-black text-white scale-105' : 'bg-white text-gray-900 border border-gray-100'}`}
+                            className={`px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition-all flex items-center gap-1.5 ${activeFilter === 'todo' ? 'bg-brand-600 text-white scale-105' : 'bg-surface text-text border border-border'}`}
                         >
                             🌍 Todo
                         </button>
@@ -228,7 +228,7 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
                         {/* "Más" (Trigger Modal) */}
                         <button
                             onClick={() => setIsFilterModalOpen(true)}
-                            className="px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition-all bg-white text-gray-500 border border-gray-100 flex items-center gap-1 active:scale-95"
+                            className="px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition-all bg-surface text-muted border border-border flex items-center gap-1 active:scale-95"
                         >
                             Más...
                         </button>

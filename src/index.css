@@ -4,20 +4,36 @@
 @tailwind utilities;
 
 :root {
-  /* Design System 2.0 */
-  --color-primary: #01F9C6;
-  /* Teal / Turquesa Vivo */
-  --color-secondary: #FFA500;
-  /* Naranja Vibrante */
-  --color-contrast: #0047AB;
-  /* Azul Oscuro / Cobalto */
+  /* Brand / Accent (Purple-Blue) */
+  --brand-700: #A010F8;
+  /* headlines/accent */
+  --brand-600: #9326F8;
+  /* gradient start */
+  --brand-500: #6D36F7;
+  /* mid */
+  --brand-400: #5840F5;
+  /* link/focus */
+  --brand-300: #514FF5;
+  /* gradient end */
 
-  --color-bg-main: #FFFFFF;
-  /* White Background */
-  --color-text-main: #000000;
-  /* Black Text */
-  --color-text-muted: #6B7280;
-  /* Gray-500 equivalent */
+  /* Neutrals */
+  --bg: #FFFFFF;
+  --surface: #F8F8F8;
+  --surface-2: #F0F0F0;
+  --border: #E6E6E6;
+
+  --text: #1A1315;
+  --text-2: #3A3A3A;
+  --muted: #6B7280;
+
+  /* Gradients */
+  --cta-gradient: linear-gradient(90deg, #9326F8 0%, #514FF5 100%);
+
+  /* Legacy mappings for compatibility (optional, can be removed if full migration is done) */
+  --color-primary: var(--brand-600);
+  --color-secondary: var(--brand-300);
+  --color-bg-main: var(--bg);
+  --color-text-main: var(--text);
 
   --font-main: 'Poppins', 'Montserrat', 'Inter', sans-serif;
 

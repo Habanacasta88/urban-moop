@@ -151,15 +151,15 @@ const LoadingFinishScreen = ({ onComplete, textType, neighborhood }) => {
                 {/* Central Radar Pulse */}
                 <div className="relative w-64 h-64 mb-12 flex items-center justify-center">
                     {/* Ripple 1 */}
-                    <div className="absolute w-full h-full border border-[#5B4B8A]/10 rounded-full animate-ping" style={{ animationDuration: '3s' }} />
+                    <div className="absolute w-full h-full border border-brand-500/10 rounded-full animate-ping" style={{ animationDuration: '3s' }} />
                     {/* Ripple 2 */}
-                    <div className="absolute w-2/3 h-2/3 border border-[#5B4B8A]/20 rounded-full animate-ping" style={{ animationDuration: '3s', animationDelay: '1s' }} />
+                    <div className="absolute w-2/3 h-2/3 border border-brand-500/20 rounded-full animate-ping" style={{ animationDuration: '3s', animationDelay: '1s' }} />
 
                     {/* Center User */}
                     <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        className="relative z-20 w-20 h-20 bg-gradient-to-tr from-[#5B4B8A] to-indigo-400 rounded-full p-1 shadow-xl shadow-indigo-200"
+                        className="relative z-20 w-20 h-20 bg-gradient-to-tr from-brand-700 to-brand-400 rounded-full p-1 shadow-xl shadow-brand-500/30"
                     >
                         <div className="w-full h-full bg-white rounded-full flex items-center justify-center overflow-hidden">
                             <img src="/logo_full.png" alt="UrbanMoop" className="w-full h-full object-contain p-2" />
@@ -183,7 +183,7 @@ const LoadingFinishScreen = ({ onComplete, textType, neighborhood }) => {
                                     initial={{ width: 0 }}
                                     animate={{ width: 60 }}
                                     transition={{ delay: match.delay + 0.2, duration: 0.5 }}
-                                    className="absolute top-1/2 left-1/2 -z-10 h-[1px] bg-gradient-to-r from-transparent to-[#5B4B8A]/30 origin-left"
+                                    className="absolute top-1/2 left-1/2 -z-10 h-[1px] bg-gradient-to-r from-transparent to-brand-500/30 origin-left"
                                     style={{ transform: 'translate(-50%, -50%) rotate(45deg)' }} // Simplified rotation
                                 />
 
@@ -205,10 +205,10 @@ const LoadingFinishScreen = ({ onComplete, textType, neighborhood }) => {
                 </div>
 
                 {/* Text Animation */}
-                <h1 className="text-2xl font-black text-gray-900 mb-2 min-h-[40px] tracking-tight">
+                <h1 className="text-2xl font-black text-brand-700 mb-2 min-h-[40px] tracking-tight">
                     {messages[textIndex]}
                 </h1>
-                <p className="text-gray-500 font-medium px-8">
+                <p className="text-muted font-medium px-8">
                     Conectando con tu tribu urbana...
                 </p>
             </div>
