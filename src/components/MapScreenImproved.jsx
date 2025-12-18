@@ -21,7 +21,6 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
     const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
     const [filters, setFilters] = useState({ time: 'any', categories: [], sort: 'recommended' });
-    const [showColorHint, setShowColorHint] = useState(showOnboardingHint);
 
     // Filter Logic
     const filteredEvents = fetchedEvents.filter(evt => {
@@ -109,7 +108,6 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
     const handlePrev = () => setCarouselIndex((prev) => (prev - 1 + filteredEvents.length) % filteredEvents.length);
 
     const handleMapSelect = (evt) => {
-        setShowColorHint(false); // Dismiss color hint on interaction
         if (currentSwipeEvent?.id === evt.id) {
             setSelectedEvent(evt);
         } else {
@@ -268,27 +266,7 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
                 )}
             </AnimatePresence>
 
-            {/* Map Color Context Tooltip (Dismiss on Interaction) */}
-            <AnimatePresence>
-                {showColorHint && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        onAnimationComplete={() => setTimeout(() => setShowColorHint(false), 4000)}
-                        className="absolute top-48 left-1/2 -translate-x-1/2 z-[40] pointer-events-none max-w-[280px]"
-                    >
-                        <div className="bg-white/90 backdrop-blur-md text-gray-900 p-3 rounded-2xl shadow-xl border border-white/50 flex flex-col items-center text-center gap-2">
-                            <span className="text-2xl">🗺️</span>
-                            <p className="text-xs font-medium leading-relaxed">
-                                <span className="font-bold text-indigo-600">Los colores muestran la vibra</span> de cada zona ahora mismo.
-                                <br />
-                                <span className="text-gray-500 font-normal">Toca un punto para ver qué pasa.</span>
-                            </p>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+
 
             {/* Bottom Nav */}
             <BottomNavigation currentView={activeTab} onNavigate={handleNavigation} />
