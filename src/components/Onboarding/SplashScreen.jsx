@@ -55,9 +55,12 @@ const SplashScreen = ({ onComplete }) => {
 
                 {/* Subtitle */}
                 <p
-                    className="text-gray-500 text-sm md:text-base mb-6 px-4 font-medium leading-relaxed max-w-xs mx-auto"
+                    className="text-gray-500 text-sm md:text-base mb-2 px-4 font-medium leading-relaxed max-w-xs mx-auto"
                 >
                     Descubre cafés nuevos, planes inesperados y secretos del barrio sin perder tiempo.
+                </p>
+                <p className="text-indigo-600 font-bold text-sm mb-6 max-w-xs mx-auto">
+                    Moops = pequeñas quedadas reales cerca de ti.
                 </p>
 
                 {/* Value Prop Badge */}
