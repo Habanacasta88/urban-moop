@@ -164,7 +164,7 @@ const LoadingFinishScreen = ({ onComplete, textType, neighborhood }) => {
                         className="relative z-20 w-20 h-20 bg-gradient-to-tr from-[#5B4B8A] to-indigo-400 rounded-full p-1 shadow-xl shadow-indigo-200"
                     >
                         <div className="w-full h-full bg-white rounded-full flex items-center justify-center overflow-hidden">
-                            <span className="text-3xl">😎</span>
+                            <img src="/logo_full.png" alt="UrbanMoop" className="w-full h-full object-contain p-2" />
                         </div>
                         {/* Status Dot */}
                         <div className="absolute bottom-1 right-1 w-5 h-5 bg-green-400 border-4 border-white rounded-full"></div>
