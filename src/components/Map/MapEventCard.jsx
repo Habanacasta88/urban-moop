@@ -2,12 +2,18 @@ import { Heart, Clock, Users, ChevronLeft, ChevronRight, X, MapPin, Star, Bookma
 import { motion, AnimatePresence } from 'motion/react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { useVibe } from '../../context/VibeContext';
-import { useState } from 'react';
+import { useActivity } from '../../context/ActivityContext';
+import { useState, useMemo } from 'react';
 
 const MapEventCard = ({ event, distance, onClose }) => {
     const { openVibeCheck } = useVibe();
-    const [interestState, setInterestState] = useState('none'); // 'none' | 'interested' | 'rating' | 'social'
-    const [showToast, setShowToast] = useState(false);
+    const { savedItems, toggleSaveItem } = useActivity();
+
+    // UI State for overlays (Toast, Rating Modal, Social Modal)
+    const [overlayMode, setOverlayMode] = useState('none'); // 'none' | 'toast' | 'rating' | 'social' | 'rated'
+
+    // Derived Interest State from Context
+    const isSaved = useMemo(() => savedItems.some(i => i.id === event.id), [savedItems, event.id]);
 
     // Mock Data for "People Going"
     const attendees = [
@@ -18,25 +24,42 @@ const MapEventCard = ({ event, distance, onClose }) => {
     ];
 
     const handleInterestClick = () => {
-        setInterestState('interested');
-        setShowToast(true);
-        // In a real app, this would trigger an API call to follow/interest
+        if (isSaved) {
+            // Unsave
+            toggleSaveItem(event);
+            setOverlayMode('none');
+        } else {
+            // Save & Show Toast
+            // Normalize event for SavedScreen (add defaults if missing)
+            const savedEvent = {
+                ...event,
+                type: event.type || 'event',
+                subtitle: event.description || event.location, // Fallback
+                badges: event.isFlash ? [{ text: 'FLASH', color: 'bg-yellow-400 text-black' }] : [],
+                distance: distance || 'Cerca',
+                // Keep other props
+            };
+            toggleSaveItem(savedEvent);
+            setOverlayMode('toast');
+        }
     };
 
     const handleRateClick = () => {
-        setInterestState('rating');
-        setShowToast(false);
+        setOverlayMode('rating');
     };
 
     const handleSocialClick = () => {
-        setInterestState('social');
-        setShowToast(false);
+        setOverlayMode('social');
     };
 
     const handleVibeSubmit = (vibe) => {
-        setInterestState('rated'); // Or back to interested
+        setOverlayMode('rated');
         // Show confirmation or close
         setTimeout(() => onClose(), 1500); // Close card after rating for "Habit Loop" effect
+    };
+
+    const dismissOverlay = () => {
+        setOverlayMode('none');
     };
 
     if (!event) return null;
@@ -147,10 +170,9 @@ const MapEventCard = ({ event, distance, onClose }) => {
             <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100 z-[2010] pb-8">
                 <button
                     onClick={handleInterestClick}
-                    disabled={interestState === 'interested'}
-                    className={`w-full font-bold py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all transform active:scale-95 ${interestState === 'interested' ? 'bg-green-100 text-green-700 shadow-none' : 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/30'}`}
+                    className={`w-full font-bold py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all transform active:scale-95 ${isSaved ? 'bg-green-100 text-green-700 shadow-none' : 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/30'}`}
                 >
-                    {interestState === 'interested' ? (
+                    {isSaved ? (
                         <>
                             <Check size={20} />
                             Te avisaremos
@@ -169,7 +191,7 @@ const MapEventCard = ({ event, distance, onClose }) => {
 
             {/* TOAST OVERLAY (State 1) */}
             <AnimatePresence>
-                {showToast && (
+                {overlayMode === 'toast' && (
                     <motion.div
                         initial={{ opacity: 0, y: 50 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -208,13 +230,13 @@ const MapEventCard = ({ event, distance, onClose }) => {
 
             {/* VIBE RATING MODAL (State 2) */}
             <AnimatePresence>
-                {interestState === 'rating' && (
+                {overlayMode === 'rating' && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         className="fixed inset-0 z-[2030] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4"
-                        onClick={() => setInterestState('none')}
+                        onClick={dismissOverlay}
                     >
                         <motion.div
                             initial={{ y: 100 }}
@@ -254,13 +276,13 @@ const MapEventCard = ({ event, distance, onClose }) => {
 
             {/* SOCIAL LIST MODAL (State 3) */}
             <AnimatePresence>
-                {interestState === 'social' && (
+                {overlayMode === 'social' && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         className="fixed inset-0 z-[2030] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4"
-                        onClick={() => setInterestState('none')}
+                        onClick={dismissOverlay}
                     >
                         <motion.div
                             initial={{ y: 100 }}
@@ -271,7 +293,7 @@ const MapEventCard = ({ event, distance, onClose }) => {
                         >
                             <div className="flex items-center justify-between mb-6">
                                 <h3 className="font-bold text-lg text-gray-900">👥 Personas interesadas</h3>
-                                <button onClick={() => setInterestState('interested')} className="p-2 bg-gray-100 rounded-full"><X size={16} /></button>
+                                <button onClick={dismissOverlay} className="p-2 bg-gray-100 rounded-full"><X size={16} /></button>
                             </div>
 
                             <div className="space-y-4">
