@@ -10,12 +10,14 @@ const OnboardingFlow = ({ onComplete }) => {
     const [userData, setUserData] = useState({});
     const [flowType, setFlowType] = useState('unknown'); // 'gps' or 'manual'
 
-    // STEP 0 -> 1: Splash to Permissions
+    // STEP 0 -> 2: Splash to Neighborhood (Skip Permissions)
     const handleSplashComplete = () => {
-        setStep(1);
+        setUserData(prev => ({ ...prev, locationGranted: false }));
+        setFlowType('manual');
+        setStep(2);
     };
 
-    // STEP 1 -> 2 or 3: Permissions to Neighborhood or Vibes
+    // STEP 1 -> 2 or 3: Permissions (Unused but kept for reference)
     const handlePermissionsNext = (locationGranted) => {
         if (locationGranted) {
             setUserData(prev => ({ ...prev, locationGranted: true }));
@@ -49,8 +51,10 @@ const OnboardingFlow = ({ onComplete }) => {
     };
 
     const handleBack = () => {
-        if (step === 3 && flowType === 'gps') {
-            setStep(1); // Back to permissions if GPS was active
+        if (step === 2) {
+            setStep(0); // Back to splash from Neighborhood
+        } else if (step === 3 && flowType === 'gps') {
+            setStep(0); // Back to splash if using old flow (though mostly manual now)
         } else if (step > 0) {
             setStep(step - 1);
         }
