@@ -74,10 +74,7 @@ export const RadarHeader = ({ onFilterChange, activeFilter, events = [] }) => {
                                     <span className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center text-amber-600"><Zap size={12} fill="currentColor" /></span>
                                     <span><b>{stats.flash}</b> promos expiran &lt;1h</span>
                                 </div>
-                                <div className="flex items-center gap-2 text-xs font-medium text-gray-700">
-                                    <span className="w-5 h-5 rounded-full bg-cyan-100 flex items-center justify-center text-cyan-600"><Users size={12} /></span>
-                                    <span><b>{stats.moops}</b> Moops activos</span>
-                                </div>
+
                             </div>
                         </motion.div>
                     ) : (
@@ -96,8 +93,7 @@ export const RadarHeader = ({ onFilterChange, activeFilter, events = [] }) => {
                                 <span><b>{stats.live}</b> LIVE</span>
                                 <span className="text-gray-300">•</span>
                                 <span><b>{stats.flash}</b> Flash</span>
-                                <span className="text-gray-300">•</span>
-                                <span><b>{stats.moops}</b> Moops</span>
+
                             </div>
                         </motion.div>
                     )}

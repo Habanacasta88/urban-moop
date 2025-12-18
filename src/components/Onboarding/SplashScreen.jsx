@@ -50,7 +50,7 @@ const SplashScreen = ({ onComplete }) => {
                 <h1
                     className="text-4xl md:text-6xl font-black mb-4 leading-[0.95] tracking-tighter w-full max-w-sm mx-auto text-gray-900"
                 >
-                    🔥 Lo que pasa <br /><span className="text-indigo-600 text-5xl md:text-7xl block mt-1">HOY</span> <span className="block mt-1">a tu alrededor.</span>
+                    Lo que pasa <br /><span className="text-indigo-600 text-5xl md:text-7xl block mt-1">HOY</span> <span className="block mt-1">a tu alrededor.</span>
                 </h1>
 
                 {/* Subtitle */}

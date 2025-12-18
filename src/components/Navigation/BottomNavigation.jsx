@@ -6,7 +6,6 @@ const BottomNavigation = ({ currentView, onNavigate }) => {
     const tabs = [
         { id: 'map', icon: Map, label: 'Mapa' },
         { id: 'feed', icon: Home, label: 'Feed' },
-        { id: 'publish', icon: Plus, label: 'Publicar', isFab: true },
         { id: 'saved', icon: FileText, label: 'Guardados' },
         { id: 'profile', icon: User, label: 'Perfil' },
     ];

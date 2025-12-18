@@ -157,7 +157,6 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops }) => {
                     {[
                         { id: 'todo', label: 'Todo' },
                         { id: 'flash', label: 'Flash', icon: '⚡' },
-                        { id: 'moop', label: 'Moops', icon: '🧑‍🤝‍🧑' },
                         { id: 'nuevo', label: 'Nuevo', icon: '✨' },
                         { id: 'trending', label: 'Trending', icon: '🔥' }
                     ].map(f => (
