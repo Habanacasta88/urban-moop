@@ -250,24 +250,19 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
             <AnimatePresence>
                 {showOnboardingHint && (
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 20 }}
-                        onAnimationComplete={() => setTimeout(onCloseHint, 2500)}
-                        className="absolute bottom-24 left-4 right-4 z-[45] pointer-events-none"
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        onAnimationComplete={() => setTimeout(onCloseHint, 3000)}
+                        className="absolute bottom-64 left-1/2 -translate-x-1/2 z-[45] pointer-events-none w-max max-w-[90%]"
                     >
-                        <div className="bg-black/90 text-white p-4 rounded-2xl shadow-2xl border border-white/20 relative">
-                            <div className="flex items-start gap-3">
-                                <span className="text-2xl animate-bounce">👇</span>
-                                <div>
-                                    <h4 className="font-bold text-sm mb-1">👋 Empieza por aquí:</h4>
-                                    <p className="text-xs text-gray-300">
-                                        Mira qué está pasando ahora mismo cerca de ti.
-                                    </p>
-                                </div>
-                            </div>
-                            {/* Arrow pointing down */}
-                            <div className="absolute -bottom-2 left-8 w-4 h-4 bg-black/90 rotate-45 border-r border-b border-white/20"></div>
+                        <div className="bg-white/90 backdrop-blur-md text-gray-900 px-5 py-3 rounded-2xl shadow-lg border border-white/50 text-center">
+                            <h4 className="font-semibold text-sm mb-0.5">🔥 Esto está pasando ahora cerca de ti</h4>
+                            <p className="text-xs text-gray-600 font-normal">
+                                Toca un plan y sal ahí fuera.
+                            </p>
+                            {/* Down Arrow */}
+                            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white/90 rotate-45 border-r border-b border-white/50"></div>
                         </div>
                     </motion.div>
                 )}
