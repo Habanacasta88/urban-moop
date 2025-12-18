@@ -101,8 +101,8 @@ export const SwipeableEventCard = ({ event, distance, onNext, onPrev, onClick })
                         </div>
 
                         {/* Footer Stats */}
-                        <div className="flex items-end justify-between mt-2">
-                            <div className="flex items-center gap-3">
+                        <div className="flex items-end justify-center mt-2 relative min-h-[30px]">
+                            <div className="flex items-center gap-3 absolute left-0 bottom-0.5">
                                 {event.attendees && (
                                     <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-lg border border-border">
                                         <Users size={12} className="text-muted" />
@@ -116,7 +116,7 @@ export const SwipeableEventCard = ({ event, distance, onNext, onPrev, onClick })
                                 )}
                             </div>
 
-                            <button className="bg-gradient-to-r from-brand-600 to-brand-300 text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg shadow-brand-500/30 active:scale-95 transition-transform mr-6 relative z-20">
+                            <button className="bg-gradient-to-r from-brand-600 to-brand-300 text-white text-[10px] font-bold px-4 py-1.5 rounded-full shadow-lg shadow-brand-500/30 active:scale-95 transition-transform relative z-20">
                                 Ver más
                             </button>
                         </div>
