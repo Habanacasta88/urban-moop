@@ -14,7 +14,7 @@ import { FilterModal } from './Map/FilterModal';
 export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboardingHint, onCloseHint }) => {
     const { events: fetchedEvents, loading } = useSupabaseMapItems();
     const { openVibeCheck } = useVibe();
-    const [activeFilter, setActiveFilter] = useState('todo'); // todo, flash, moop, nuevo, trending
+    const [activeFilter, setActiveFilter] = useState('live'); // todo, flash, moop, nuevo, trending
     const [viewMode, setViewMode] = useState('map'); // map, list
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
@@ -170,28 +170,28 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
                 {/* Filters Horizontal Scroll */}
                 <div className="flex items-center gap-2 overflow-x-auto pb-2 mt-3 pointer-events-auto no-scrollbar scroll-pl-4">
                     <div className="flex items-center gap-2">
-                        {/* Static "Todo" */}
-                        <button
-                            onClick={() => setActiveFilter('todo')}
-                            className={`px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition-all ${activeFilter === 'todo' ? 'bg-black text-white scale-105' : 'bg-white text-gray-900 border border-gray-100'}`}
-                        >
-                            Todo
-                        </button>
-
-                        {/* "Ahora" (Live) */}
+                        {/* "Ahora" (Live) - DEFAULT & FIRST */}
                         <button
                             onClick={() => setActiveFilter('live')}
-                            className={`px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition-all ${activeFilter === 'live' ? 'bg-black text-white scale-105' : 'bg-white text-gray-900 border border-gray-100 text-red-600'}`}
+                            className={`px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition-all flex items-center gap-1.5 ${activeFilter === 'live' ? 'bg-black text-white scale-105' : 'bg-white text-gray-900 border border-gray-100 text-red-600'}`}
                         >
-                            🔴 Ahora
+                            🔥 Ahora
                         </button>
 
                         {/* "Moops" */}
                         <button
                             onClick={() => setActiveFilter('moop')}
-                            className={`px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition-all ${activeFilter === 'moop' ? 'bg-black text-white scale-105' : 'bg-white text-gray-900 border border-gray-100 text-indigo-600'}`}
+                            className={`px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition-all flex items-center gap-1.5 ${activeFilter === 'moop' ? 'bg-black text-white scale-105' : 'bg-white text-gray-900 border border-gray-100 text-indigo-600'}`}
                         >
                             👥 Moops
+                        </button>
+
+                        {/* "Todo" - Moved to 3rd */}
+                        <button
+                            onClick={() => setActiveFilter('todo')}
+                            className={`px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition-all flex items-center gap-1.5 ${activeFilter === 'todo' ? 'bg-black text-white scale-105' : 'bg-white text-gray-900 border border-gray-100'}`}
+                        >
+                            🌍 Todo
                         </button>
 
                         {/* "Más" (Trigger Modal) */}
