@@ -124,17 +124,17 @@ const UserProfile = ({ onRequestLogin, onOpenChats }) => {
 
     if (!user) {
         return (
-            <div className="w-full h-full bg-gray-900 flex flex-col items-center justify-center p-8">
-                <div className="w-24 h-24 bg-gray-800 rounded-full flex items-center justify-center mb-6 text-gray-600">
+            <div className="w-full h-full bg-bg flex flex-col items-center justify-center p-8">
+                <div className="w-24 h-24 bg-surface rounded-full flex items-center justify-center mb-6 text-muted border border-border">
                     <User size={48} />
                 </div>
-                <h2 className="text-2xl font-bold text-white mb-2 text-center">Perfil de Invitado</h2>
-                <p className="text-gray-400 text-center mb-8 max-w-xs">
+                <h2 className="text-2xl font-bold text-brand-700 mb-2 text-center">Perfil de Invitado</h2>
+                <p className="text-muted text-center mb-8 max-w-xs font-medium">
                     Inicia sesión para guardar tus sitios favoritos, unirte a Moops y personalizar tu perfil.
                 </p>
                 <button
                     onClick={onRequestLogin}
-                    className="w-full max-w-xs bg-white text-gray-900 font-bold py-4 rounded-2xl flex items-center justify-center gap-2 hover:bg-gray-100 transition shadow-lg"
+                    className="w-full max-w-xs bg-brand-600 text-white font-bold py-4 rounded-full flex items-center justify-center gap-2 hover:bg-brand-700 transition shadow-lg shadow-brand-500/30"
                 >
                     Iniciar Sesión / Registrarse
                 </button>
@@ -143,25 +143,25 @@ const UserProfile = ({ onRequestLogin, onOpenChats }) => {
     }
 
     if (loading) {
-        return <div className="p-10 text-center text-gray-500 mt-20">Cargando perfil...</div>;
+        return <div className="p-10 text-center text-muted mt-20 font-medium">Cargando perfil...</div>;
     }
 
     return (
-        <div className="w-full h-full bg-gray-900 pb-24 overflow-y-auto hide-scrollbar">
+        <div className="w-full h-full bg-bg pb-24 overflow-y-auto hide-scrollbar">
             {/* 1. Información Básica */}
-            <div className="p-6 flex flex-col items-center border-b border-gray-800">
-                <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 p-1 mb-4">
-                    <div className="w-full h-full rounded-full bg-gray-800 border-[3px] border-gray-900 overflow-hidden">
+            <div className="p-6 flex flex-col items-center border-b border-border bg-bg/50 backdrop-blur-sm">
+                <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-brand-600 to-brand-400 p-1 mb-4 shadow-xl shadow-brand-500/20">
+                    <div className="w-full h-full rounded-full bg-white border-[3px] border-white overflow-hidden">
                         {profile.avatar_url ? (
                             <img src={profile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
                         ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-gray-700 text-white"><User size={40} /></div>
+                            <div className="w-full h-full flex items-center justify-center bg-brand-50 text-brand-300"><User size={40} /></div>
                         )}
                     </div>
                 </div>
 
-                <h2 className="text-2xl font-bold text-white mb-1">{profile.full_name}</h2>
-                <div className="flex items-center gap-1 text-gray-400 mb-6 font-medium">
+                <h2 className="text-2xl font-black text-brand-700 mb-1 tracking-tight">{profile.full_name}</h2>
+                <div className="flex items-center gap-1 text-muted mb-6 font-medium text-sm">
                     <MapPin size={14} /> {profile.neighborhood}
                 </div>
 
@@ -169,54 +169,54 @@ const UserProfile = ({ onRequestLogin, onOpenChats }) => {
                     <button
                         onClick={handleSave}
                         disabled={saving}
-                        className="flex-1 bg-white text-gray-900 font-bold py-2.5 rounded-full flex items-center justify-center gap-2 text-sm hover:bg-gray-100 transition shadow-lg disabled:opacity-50"
+                        className="flex-1 bg-black text-white font-bold py-2.5 rounded-full flex items-center justify-center gap-2 text-sm hover:bg-gray-800 transition shadow-lg disabled:opacity-50"
                     >
                         {saving ? 'Guardando...' : <><Edit2 size={16} /> Guardar Cambios</>}
                     </button>
-                    <button onClick={onOpenChats} className="w-12 flex items-center justify-center bg-blue-600 text-white rounded-full border border-blue-500 hover:bg-blue-700 transition shadow-lg">
+                    <button onClick={onOpenChats} className="w-12 h-12 flex items-center justify-center bg-white text-brand-600 rounded-full border border-border hover:bg-brand-50 transition shadow-md">
                         <MessageCircle size={20} />
                     </button>
-                    <button onClick={signOut} className="w-12 flex items-center justify-center bg-red-900/30 text-red-500 rounded-full border border-red-900/50 hover:bg-red-900/50 transition">
+                    <button onClick={signOut} className="w-12 h-12 flex items-center justify-center bg-red-50 text-red-500 rounded-full border border-red-200 hover:bg-red-100 transition shadow-sm">
                         <LogOut size={20} />
                     </button>
                 </div>
 
                 {/* STATS ROW (Recovered) */}
-                <div className="flex w-full justify-between items-center mt-6 px-4 bg-gray-800/50 rounded-2xl py-3 border border-gray-700">
+                <div className="flex w-full justify-between items-center mt-6 px-4 bg-surface rounded-2xl py-4 border border-border shadow-sm">
                     <div className="flex flex-col items-center">
-                        <span className="text-xl font-black text-white">42</span>
-                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Moops</span>
+                        <span className="text-xl font-black text-brand-700">42</span>
+                        <span className="text-[10px] text-muted font-bold uppercase tracking-wider">Moops</span>
                     </div>
-                    <div className="w-px h-8 bg-gray-700" />
+                    <div className="w-px h-8 bg-border" />
                     <div className="flex flex-col items-center">
-                        <span className="text-xl font-black text-yellow-400">850</span>
-                        <span className="text-[10px] text-yellow-500/80 font-bold uppercase tracking-wider">Karma</span>
+                        <span className="text-xl font-black text-yellow-500">850</span>
+                        <span className="text-[10px] text-yellow-600/80 font-bold uppercase tracking-wider">Karma</span>
                     </div>
-                    <div className="w-px h-8 bg-gray-700" />
+                    <div className="w-px h-8 bg-border" />
                     <div className="flex flex-col items-center">
-                        <span className="text-xl font-black text-white">128</span>
-                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Amigos</span>
+                        <span className="text-xl font-black text-brand-700">128</span>
+                        <span className="text-[10px] text-muted font-bold uppercase tracking-wider">Amigos</span>
                     </div>
                 </div>
             </div>
 
             {/* 2. Mi Experiencia UrbanMoop */}
-            <div className="p-6 border-b border-gray-800">
+            <div className="p-6 border-b border-border">
                 <div className="flex items-center gap-2 mb-6">
-                    <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                    <div className="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center text-brand-600">
                         <Globe size={18} />
                     </div>
-                    <h3 className="text-lg font-bold text-white">Mi Experiencia UrbanMoop</h3>
+                    <h3 className="text-lg font-bold text-text">Mi Experiencia UrbanMoop</h3>
                 </div>
 
                 {/* Barrio */}
                 <div className="mb-8">
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 block ml-1">Mi Barrio Actual</label>
-                    <button className="w-full bg-gray-800 p-4 rounded-xl flex items-center justify-between hover:bg-gray-750 transition group">
-                        <span className="text-white font-medium flex items-center gap-2">
-                            <MapPin size={18} className="text-primary" /> {profile.neighborhood}
+                    <label className="text-xs font-bold text-muted uppercase tracking-wider mb-3 block ml-1">Mi Barrio Actual</label>
+                    <button className="w-full bg-surface p-4 rounded-xl flex items-center justify-between hover:bg-surface-2 transition group border border-border">
+                        <span className="text-text font-bold flex items-center gap-2">
+                            <MapPin size={18} className="text-brand-500" /> {profile.neighborhood}
                         </span>
-                        <ChevronRight size={18} className="text-gray-500 group-hover:text-white" />
+                        <ChevronRight size={18} className="text-muted group-hover:text-brand-500" />
                     </button>
                 </div>
 
@@ -224,8 +224,8 @@ const UserProfile = ({ onRequestLogin, onOpenChats }) => {
                 {/* RANGO DE EDAD */}
                 <div className="mb-8">
                     <div className="flex justify-between items-center mb-3 px-1">
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Rango de Edad</label>
-                        <button className="text-xs font-bold text-primary">Editar</button>
+                        <label className="text-xs font-bold text-muted uppercase tracking-wider">Rango de Edad</label>
+                        <button className="text-xs font-bold text-brand-600">Editar</button>
                     </div>
                     <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
                         {['18-25', '26-30', '31-35', '36-45', '45+'].map(bg => (
@@ -233,8 +233,8 @@ const UserProfile = ({ onRequestLogin, onOpenChats }) => {
                                 key={bg}
                                 onClick={() => setAgeRange(bg)}
                                 className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all border ${ageRange === bg
-                                    ? 'bg-white text-black border-white shadow-lg'
-                                    : 'bg-gray-800 text-gray-400 border-gray-800 hover:bg-gray-750'
+                                    ? 'bg-brand-600 text-white border-brand-600 shadow-lg shadow-brand-500/20'
+                                    : 'bg-surface text-muted border-border hover:bg-surface-2'
                                     }`}
                             >
                                 {bg}
@@ -246,8 +246,8 @@ const UserProfile = ({ onRequestLogin, onOpenChats }) => {
                 {/* INTERESES URBANOS */}
                 <div className="mb-8">
                     <div className="flex justify-between items-center mb-3 px-1">
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Intereses Urbanos</label>
-                        <button className="text-xs font-bold text-primary">Editar</button>
+                        <label className="text-xs font-bold text-muted uppercase tracking-wider">Intereses Urbanos</label>
+                        <button className="text-xs font-bold text-brand-600">Editar</button>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
                         {[
@@ -263,10 +263,10 @@ const UserProfile = ({ onRequestLogin, onOpenChats }) => {
                         ].map(item => (
                             <button
                                 key={item.id}
-                                className="bg-gray-800 rounded-xl p-3 flex flex-col items-center gap-2 hover:bg-gray-750 transition-colors border border-gray-800 hover:border-gray-700"
+                                className="bg-surface rounded-xl p-3 flex flex-col items-center gap-2 hover:bg-surface-2 transition-colors border border-border hover:border-brand-200 group"
                             >
-                                <span className="text-2xl">{item.icon}</span>
-                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">{item.label}</span>
+                                <span className="text-2xl group-hover:scale-110 transition-transform">{item.icon}</span>
+                                <span className="text-[10px] font-bold text-muted uppercase tracking-wide group-hover:text-brand-600">{item.label}</span>
                             </button>
                         ))}
                     </div>
@@ -275,8 +275,8 @@ const UserProfile = ({ onRequestLogin, onOpenChats }) => {
                 {/* CONTENIDO PREFERIDO */}
                 <div className="mb-8">
                     <div className="flex justify-between items-center mb-3 px-1">
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Contenido Preferido</label>
-                        <button className="text-xs font-bold text-primary">Editar</button>
+                        <label className="text-xs font-bold text-muted uppercase tracking-wider">Contenido Preferido</label>
+                        <button className="text-xs font-bold text-brand-600">Editar</button>
                     </div>
                     <div className="space-y-2">
                         {[
@@ -286,10 +286,10 @@ const UserProfile = ({ onRequestLogin, onOpenChats }) => {
                             { id: 'routes', icon: '🗺️', label: 'Rutas Moop' },
                             { id: 'dailyPlans', icon: '📅', label: 'Planes del día' },
                         ].map(pref => (
-                            <div key={pref.id} className="flex items-center justify-between bg-gray-800/50 p-3 rounded-xl border border-gray-800 hover:bg-gray-800 transition-colors">
+                            <div key={pref.id} className="flex items-center justify-between bg-surface p-3 rounded-xl border border-border hover:bg-surface-2 transition-colors">
                                 <div className="flex items-center gap-3">
                                     <span className="text-lg">{pref.icon}</span>
-                                    <span className="text-sm font-medium text-gray-300">{pref.label}</span>
+                                    <span className="text-sm font-bold text-text-2">{pref.label}</span>
                                 </div>
                                 <Toggle
                                     active={contentPrefs[pref.id]}
@@ -301,40 +301,40 @@ const UserProfile = ({ onRequestLogin, onOpenChats }) => {
                 </div>
 
                 {/* UBICACIÓN PRECISA */}
-                <div className="bg-gray-800/30 p-4 rounded-2xl border border-gray-800">
+                <div className="bg-brand-50/50 p-4 rounded-2xl border border-brand-100">
                     <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
-                            <Map className="text-gray-400" size={18} />
-                            <span className="text-sm font-bold text-white">Ubicación precisa</span>
+                            <Map className="text-brand-500" size={18} />
+                            <span className="text-sm font-bold text-brand-900">Ubicación precisa</span>
                         </div>
                         <Toggle active={preciseLocation} onToggle={() => setPreciseLocation(!preciseLocation)} />
                     </div>
-                    <p className="text-[10px] text-gray-500 leading-relaxed">
-                        Se activa solo cuando abres el mapa para eventos cercanos. <span className="text-emerald-500 flex items-center gap-1 inline-flex mt-1"><Shield size={10} /> Privacidad protegida</span>
+                    <p className="text-[10px] text-brand-700/60 leading-relaxed font-medium">
+                        Se activa solo cuando abres el mapa para eventos cercanos. <span className="text-emerald-600 flex items-center gap-1 inline-flex mt-1"><Shield size={10} /> Privacidad protegida</span>
                     </p>
                 </div>
             </div>
 
             {/* 3. MENU GRID (Recovered) */}
-            <div className="p-4 grid grid-cols-4 gap-2 border-b border-gray-800">
+            <div className="p-4 grid grid-cols-4 gap-2 border-b border-border">
                 {[
-                    { icon: Calendar, label: 'Eventos', color: 'text-blue-400 bg-blue-500/10' },
-                    { icon: Activity, label: 'Actividad', color: 'text-purple-400 bg-purple-500/10' },
-                    { icon: Newspaper, label: 'Noticias', color: 'text-pink-400 bg-pink-500/10' },
-                    { icon: Settings, label: 'Ajustes', color: 'text-gray-400 bg-gray-700/50' }
+                    { icon: Calendar, label: 'Eventos', color: 'text-blue-600 bg-blue-50' },
+                    { icon: Activity, label: 'Actividad', color: 'text-purple-600 bg-purple-50' },
+                    { icon: Newspaper, label: 'Noticias', color: 'text-pink-600 bg-pink-50' },
+                    { icon: Settings, label: 'Ajustes', color: 'text-gray-600 bg-gray-100' }
                 ].map((item, i) => (
-                    <button key={i} className="aspect-square rounded-2xl bg-gray-800/50 flex flex-col items-center justify-center gap-2 hover:bg-gray-800 transition active:scale-95">
+                    <button key={i} className="aspect-square rounded-2xl bg-surface flex flex-col items-center justify-center gap-2 hover:bg-surface-2 transition active:scale-95 border border-border">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center ${item.color}`}>
                             <item.icon size={20} />
                         </div>
-                        <span className="text-[10px] font-bold text-gray-400">{item.label}</span>
+                        <span className="text-[10px] font-bold text-text-2">{item.label}</span>
                     </button>
                 ))}
             </div>
 
             {/* 5. Manifesto */}
             <div className="p-6">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 block ml-1 flex items-center gap-2">
+                <label className="text-xs font-bold text-muted uppercase tracking-wider mb-4 block ml-1 flex items-center gap-2">
                     <Edit2 size={12} /> Mi Manifiesto
                 </label>
                 <div className="relative">
@@ -342,9 +342,9 @@ const UserProfile = ({ onRequestLogin, onOpenChats }) => {
                         value={profile.bio}
                         onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
                         placeholder="Escribe algo sobre ti..."
-                        className="w-full bg-gray-800 text-white p-4 rounded-2xl border border-gray-700 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm leading-relaxed min-h-[120px] resize-none italic"
+                        className="w-full bg-surface text-text p-4 rounded-2xl border border-border focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none text-sm leading-relaxed min-h-[120px] resize-none italic font-medium placeholder:text-muted"
                     />
-                    <div className="absolute bottom-4 right-4 text-[10px] text-gray-500 bg-gray-900/80 px-2 py-1 rounded">
+                    <div className="absolute bottom-4 right-4 text-[10px] text-brand-600 bg-brand-50 px-2 py-1 rounded border border-brand-100 font-bold">
                         Visible en tu perfil
                     </div>
                 </div>
@@ -353,12 +353,12 @@ const UserProfile = ({ onRequestLogin, onOpenChats }) => {
             <div className="p-6 pt-2">
                 <button
                     onClick={() => window.open('https://wa.me/34600000000', '_blank')}
-                    className="w-full bg-[#25D366] text-white p-4 rounded-2xl flex items-center justify-center gap-3 font-bold shadow-lg hover:bg-[#128C7E] transition-colors active:scale-95 transform"
+                    className="w-full bg-[#25D366] text-white p-4 rounded-xl flex items-center justify-center gap-3 font-bold shadow-lg hover:bg-[#128C7E] transition-colors active:scale-95 transform"
                 >
                     <MessageCircle size={24} fill="currentColor" className="text-white" />
                     <span>Contactar con Soporte</span>
                 </button>
-                <p className="text-center text-gray-600 text-xs mt-6 mb-2">
+                <p className="text-center text-muted text-xs mt-6 mb-2 font-medium">
                     UrbanMoop - Connected
                 </p>
             </div>
