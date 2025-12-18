@@ -204,6 +204,13 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
                     selectedId={currentSwipeEvent?.id}
                     onSelect={handleMapSelect}
                 />
+                {/* Initial Blur Overlay */}
+                <motion.div
+                    initial={{ backdropFilter: 'blur(6px)', backgroundColor: 'rgba(255,255,255,0.1)' }}
+                    animate={{ backdropFilter: 'blur(0px)', backgroundColor: 'rgba(255,255,255,0)' }}
+                    transition={{ duration: 1.2, ease: "easeOut" }}
+                    className="absolute inset-0 pointer-events-none z-10"
+                />
             </div>
 
             {/* 3. Swipeable Card (Z-Index 40) */}
