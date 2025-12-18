@@ -20,6 +20,10 @@ export const SwipeableEventCard = ({ event, onNext, onPrev, onClick }) => {
     return (
         <div className="absolute bottom-24 left-0 right-0 px-4 z-20 flex justify-center perspective-1000">
             <motion.div
+                initial={{ y: 50, opacity: 0, scale: 0.95 }}
+                animate={{ y: 0, opacity: 1, scale: 1 }}
+                exit={{ y: 50, opacity: 0, scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 style={{ x, opacity, rotate }}
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
@@ -28,6 +32,9 @@ export const SwipeableEventCard = ({ event, onNext, onPrev, onClick }) => {
                 onClick={onClick}
                 className="w-full bg-white rounded-3xl shadow-2xl overflow-hidden cursor-grab active:cursor-grabbing border border-white/60 relative"
             >
+                {/* Micro Label */}
+                <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-red-500 to-indigo-500 opacity-20" />
+
                 <div className="flex h-36">
                     {/* Image Section / Prev Trigger */}
                     <div
@@ -74,6 +81,13 @@ export const SwipeableEventCard = ({ event, onNext, onPrev, onClick }) => {
                         </div>
 
                         <div>
+                            {/* Recommendation Label */}
+                            <div className="flex items-center gap-1 mb-1">
+                                <span className="text-[9px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded-md border border-indigo-100 uppercase tracking-wide">
+                                    🔥 Recomendado para ti
+                                </span>
+                            </div>
+
                             <h3 className="font-excep font-black text-gray-900 text-lg leading-tight line-clamp-2 mb-1">
                                 {event.title}
                             </h3>
