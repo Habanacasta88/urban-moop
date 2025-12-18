@@ -36,8 +36,8 @@ const VibeSelector = ({ onNext, onBack, data }) => {
                 </div>
             </div>
 
-            <h2 className="text-3xl font-black text-gray-900 mb-3">✨ ¿Qué vibra tienes hoy?</h2>
-            <p className="text-gray-500 font-medium text-sm mb-10 leading-relaxed">
+            <h2 className="text-3xl font-black text-brand-700 mb-3">✨ ¿Qué vibra tienes hoy?</h2>
+            <p className="text-muted font-medium text-sm mb-10 leading-relaxed">
                 Elige al menos una. Ajustaremos tu mapa como si fuera un radar social.
             </p>
 
@@ -47,16 +47,16 @@ const VibeSelector = ({ onNext, onBack, data }) => {
                         key={vibe.id}
                         onClick={() => toggleVibe(vibe.id)}
                         className={`p-2 rounded-3xl border transition-all flex flex-col items-center justify-center gap-2 aspect-square ${selectedVibes.includes(vibe.id)
-                            ? 'bg-indigo-600 border-indigo-500 shadow-lg shadow-indigo-500/30 ring-1 ring-white/20'
-                            : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:scale-[1.02]'
+                            ? 'bg-brand-600 border-brand-500 shadow-lg shadow-brand-500/30 ring-1 ring-white/20'
+                            : 'bg-white border-border hover:bg-surface-2 hover:border-brand-200 hover:scale-[1.02]'
                             }`}
                     >
                         <span className="text-3xl filter drop-shadow-md">{vibe.icon}</span>
                         <div className="text-center">
-                            <span className={`block font-bold text-xs ${selectedVibes.includes(vibe.id) ? 'text-white' : 'text-gray-900'}`}>
+                            <span className={`block font-bold text-xs ${selectedVibes.includes(vibe.id) ? 'text-white' : 'text-text'}`}>
                                 {vibe.label}
                             </span>
-                            <span className={`text-[9px] font-medium uppercase tracking-wider ${selectedVibes.includes(vibe.id) ? 'text-indigo-200' : 'text-gray-500'}`}>
+                            <span className={`text-[9px] font-medium uppercase tracking-wider ${selectedVibes.includes(vibe.id) ? 'text-brand-200' : 'text-muted'}`}>
                                 {vibe.desc}
                             </span>
                         </div>
@@ -67,7 +67,7 @@ const VibeSelector = ({ onNext, onBack, data }) => {
             <div className="mt-auto pb-8">
                 <button
                     onClick={() => onNext(selectedVibes)}
-                    className="w-full bg-gray-900 hover:bg-black text-white font-black py-4 rounded-xl text-lg shadow-lg shadow-gray-900/10 transition-all active:scale-95"
+                    className="w-full bg-gradient-to-r from-brand-600 to-brand-300 hover:opacity-90 text-white font-black py-4 rounded-full text-lg shadow-lg shadow-brand-500/30 transition-all active:scale-95"
                 >
                     Continuar hacia el Mapa
                 </button>

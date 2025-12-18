@@ -23,38 +23,38 @@ const Permissions = ({ onNext, onBack }) => {
             {/* VISUAL HEADER */}
             <div className="flex-1 flex flex-col items-center justify-center text-center mb-8 relative">
                 {/* Dynamic Background Effect */}
-                <div className="absolute inset-0 bg-gradient-to-b from-indigo-500/10 to-transparent blur-3xl -z-10 rounded-full"></div>
+                <div className="absolute inset-0 bg-gradient-to-b from-brand-500/10 to-transparent blur-3xl -z-10 rounded-full"></div>
 
-                <div className="w-24 h-24 bg-gradient-to-tr from-indigo-500 to-purple-600 rounded-3xl flex items-center justify-center mb-8 shadow-xl shadow-indigo-500/30 rotate-3 transform transition-transform hover:rotate-6">
+                <div className="w-24 h-24 bg-gradient-to-tr from-brand-600 to-brand-400 rounded-3xl flex items-center justify-center mb-8 shadow-xl shadow-brand-500/30 rotate-3 transform transition-transform hover:rotate-6">
                     <MapPin size={48} className="text-white drop-shadow-md" />
                 </div>
 
-                <h2 className="text-3xl font-black text-gray-900 mb-4 leading-tight">
+                <h2 className="text-3xl font-black text-brand-700 mb-4 leading-tight">
                     Activa tu ubicación 📍
                 </h2>
-                <p className="text-gray-500 text-sm leading-relaxed max-w-xs mx-auto font-medium">
+                <p className="text-muted text-sm leading-relaxed max-w-xs mx-auto font-medium">
                     Para mostrarte solo lo que está pasando a un paso de ti. Planes reales. Personas reales. Ahora.
                 </p>
             </div>
 
             {/* OPTIONS LIST */}
             <div className="w-full space-y-3 mb-8">
-                <div className="flex gap-4 p-5 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                    <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-xl shrink-0">
+                <div className="flex gap-4 p-5 bg-white rounded-2xl border border-border shadow-sm">
+                    <div className="w-10 h-10 bg-brand-50 rounded-xl flex items-center justify-center text-xl shrink-0">
                         👋
                     </div>
                     <div className="text-left">
-                        <h3 className="font-bold text-gray-900 text-sm mb-1">Viajeros y moopers cerca</h3>
-                        <p className="text-xs text-gray-500 leading-relaxed">Conecta con personas que están literalmente a unos metros.</p>
+                        <h3 className="font-bold text-text text-sm mb-1">Viajeros y moopers cerca</h3>
+                        <p className="text-xs text-muted leading-relaxed">Conecta con personas que están literalmente a unos metros.</p>
                     </div>
                 </div>
-                <div className="flex gap-4 p-5 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                    <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-xl shrink-0">
+                <div className="flex gap-4 p-5 bg-white rounded-2xl border border-border shadow-sm">
+                    <div className="w-10 h-10 bg-brand-50 rounded-xl flex items-center justify-center text-xl shrink-0">
                         ☕
                     </div>
                     <div className="text-left">
-                        <h3 className="font-bold text-gray-900 text-sm mb-1">Actividades locales</h3>
-                        <p className="text-xs text-gray-500 leading-relaxed">Descubre planes que están ocurriendo en tu ciudad ahora mismo.</p>
+                        <h3 className="font-bold text-text text-sm mb-1">Actividades locales</h3>
+                        <p className="text-xs text-muted leading-relaxed">Descubre planes que están ocurriendo en tu ciudad ahora mismo.</p>
                     </div>
                 </div>
             </div>
@@ -63,13 +63,13 @@ const Permissions = ({ onNext, onBack }) => {
             <div className="space-y-3">
                 <button
                     onClick={() => onNext(true)}
-                    className="w-full py-4 rounded-xl font-black text-white bg-gray-900 shadow-lg shadow-gray-900/10 active:scale-95 transition-transform"
+                    className="w-full py-4 rounded-full font-black text-white bg-gradient-to-r from-brand-600 to-brand-300 shadow-lg shadow-brand-500/30 active:scale-95 transition-transform"
                 >
                     Activar Ubicación
                 </button>
                 <button
                     onClick={() => onNext(false)}
-                    className="w-full py-4 rounded-xl font-bold text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                    className="w-full py-4 rounded-full font-bold text-muted hover:text-text hover:bg-surface transition-colors"
                 >
                     Seleccionar manualmente
                 </button>

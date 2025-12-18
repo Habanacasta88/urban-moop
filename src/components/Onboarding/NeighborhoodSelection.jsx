@@ -25,8 +25,8 @@ const NeighborhoodSelection = ({ onNext, onBack }) => {
                 </div>
             </div>
 
-            <h2 className="text-3xl font-black text-gray-900 mb-3">🗺️ ¿Dónde te mueves normalmente?</h2>
-            <p className="text-gray-500 font-medium text-sm mb-10 leading-relaxed">
+            <h2 className="text-3xl font-black text-brand-700 mb-3">🗺️ ¿Dónde te mueves normalmente?</h2>
+            <p className="text-muted font-medium text-sm mb-10 leading-relaxed">
                 Te recomendaremos planes relevantes según tu zona de acción diaria.
             </p>
 
@@ -35,14 +35,14 @@ const NeighborhoodSelection = ({ onNext, onBack }) => {
                     <button
                         key={hood.id}
                         onClick={() => onNext(hood.id)}
-                        className="flex items-center gap-5 bg-white p-5 rounded-2xl border border-gray-100 hover:bg-gray-50 hover:border-gray-200 hover:scale-[1.02] active:scale-95 transition-all text-left group shadow-lg shadow-black/5"
+                        className="flex items-center gap-5 bg-white p-5 rounded-2xl border border-border hover:bg-surface-2 hover:border-brand-200 hover:scale-[1.02] active:scale-95 transition-all text-left group shadow-lg shadow-black/5"
                     >
-                        <div className="w-14 h-14 bg-indigo-50 rounded-xl flex items-center justify-center text-2xl group-hover:bg-indigo-100 transition-colors border border-indigo-100">
+                        <div className="w-14 h-14 bg-brand-50 rounded-xl flex items-center justify-center text-2xl group-hover:bg-brand-100 transition-colors border border-brand-100">
                             {hood.icon}
                         </div>
                         <div>
-                            <h3 className="text-gray-900 font-bold text-lg mb-0.5 group-hover:text-indigo-600 transition-colors">{hood.name}</h3>
-                            <p className="text-gray-500 text-xs font-medium">{hood.desc}</p>
+                            <h3 className="text-text font-bold text-lg mb-0.5 group-hover:text-brand-600 transition-colors">{hood.name}</h3>
+                            <p className="text-muted text-xs font-medium">{hood.desc}</p>
                         </div>
                     </button>
                 ))}
