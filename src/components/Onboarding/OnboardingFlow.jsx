@@ -111,14 +111,12 @@ const LoadingFinishScreen = ({ onComplete, textType, neighborhood }) => {
 
     // Dynamic Messages
     const getMessages = () => {
-        const base = ["Sintonizando vibes..."];
-        if (textType === 'gps') base.push("Escaneando tu zona...");
-        else if (textType === 'hood') base.push(`Explorando ${neighborhood || 'el barrio'}...`);
-        else base.push("Buscando eventos cercanos...");
-
-        base.push("Conectando con gente afín...");
-        base.push("¡Todo listo! 🚀");
-        return base;
+        return [
+            "Encontrando planes…",
+            "Detectando moops activos…",
+            "Cargando vibra del barrio…",
+            "¡Todo listo! 🚀"
+        ];
     };
 
     const messages = getMessages();
