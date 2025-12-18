@@ -273,6 +273,7 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.9 }}
+                        onAnimationComplete={() => setTimeout(() => setShowColorHint(false), 4000)}
                         className="absolute top-48 left-1/2 -translate-x-1/2 z-[40] pointer-events-none max-w-[280px]"
                     >
                         <div className="bg-white/90 backdrop-blur-md text-gray-900 p-3 rounded-2xl shadow-xl border border-white/50 flex flex-col items-center text-center gap-2">
