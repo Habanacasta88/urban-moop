@@ -38,8 +38,11 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
         // 2. Quick Filters (Top Bar)
         if (activeFilter !== 'todo') {
             if (activeFilter === 'live') {
+                // Priority to explicit isLive flag from DB or Mock
+                if (evt.isLive) return true;
+
+                // Fallback: Date check if isLive is missing/false but times are set
                 const now = new Date();
-                // Simple live check: start_time <= now <= end_time
                 if (!evt.start_time || !evt.end_time) return false;
                 const start = new Date(evt.start_time);
                 const end = new Date(evt.end_time);

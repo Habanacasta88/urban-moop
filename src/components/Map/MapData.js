@@ -78,7 +78,7 @@ export const MAP_DATA = [
         time: '18:50 / 19:05 / 19:20',
         description: 'Show de luces y música sincronizado con las fuentes, muy visual para los niños.',
         tags: ['Navidad', 'Luces', 'Música'],
-        isLive: true
+        isLive: true // Now active
     },
     {
         id: 'xmas-lanterns',
@@ -142,7 +142,7 @@ export const MAP_DATA = [
         time: 'Abre 12 dic',
         description: 'Feria de artesanía local para encontrar regalos y productos únicos.',
         tags: ['Feria', 'Artesanía', 'Regalos'],
-        isLive: true
+        isLive: false // Future event
     },
 
     // --- Activities & Places (Actividades y Lugares) ---
@@ -160,7 +160,7 @@ export const MAP_DATA = [
         time: 'Fines de semana',
         description: 'Icono modernista. Visita para conocer la historia industrial y arquitectónica.',
         tags: ['Turismo', 'Historia', 'Vistas'],
-        isLive: true
+        isLive: false // Weekend only
     },
     {
         id: 'act-mhs-expo',
@@ -192,7 +192,7 @@ export const MAP_DATA = [
         time: 'Fines de semana',
         description: 'Sube al campanario gótico para tener unas vistas panorámicas del centro.',
         tags: ['Vistas', 'Turismo', 'Foto'],
-        isLive: true
+        isLive: false // Weekend only
     },
     {
         id: 'act-park',
@@ -224,7 +224,7 @@ export const MAP_DATA = [
         time: 'Mié 10 dic - 18:00',
         description: 'Taller de manualidades navideñas o decoración, dirigido al público adulto.',
         tags: ['Taller', 'Manualidades', 'Adultos'],
-        isLive: true
+        isLive: false // Future workshop
     },
     {
         id: 'act-choir',
@@ -240,7 +240,7 @@ export const MAP_DATA = [
         time: 'Sáb 13 dic - 19:30',
         description: 'Concierto de coro local con repertorio especial de villancicos.',
         tags: ['Música', 'Navidad', 'Concierto'],
-        isLive: true
+        isLive: false // Future concert
     },
     {
         id: 'act-market',
