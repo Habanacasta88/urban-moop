@@ -14,7 +14,7 @@ import { FilterModal } from './Map/FilterModal';
 export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboardingHint, onCloseHint }) => {
     const { events: fetchedEvents, loading } = useSupabaseMapItems();
     const { openVibeCheck } = useVibe();
-    const [activeFilter, setActiveFilter] = useState('live'); // todo, flash, moop, nuevo, trending
+    const [activeFilter, setActiveFilter] = useState('todo'); // todo, flash, moop, nuevo, trending
     const [viewMode, setViewMode] = useState('map'); // map, list
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
