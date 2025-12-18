@@ -214,8 +214,11 @@ export const ActivityProvider = ({ children }) => {
     // ... rest of file
 
     const toggleSaveItem = (item) => {
-        if (savedItems.find(i => i.id === item.id)) {
-            setSavedItems(savedItems.filter(i => i.id !== item.id));
+        // Robust ID comparison (handle string vs number)
+        const isAlreadySaved = savedItems.some(i => String(i.id) === String(item.id));
+
+        if (isAlreadySaved) {
+            setSavedItems(savedItems.filter(i => String(i.id) !== String(item.id)));
         } else {
             setSavedItems([...savedItems, item]);
         }

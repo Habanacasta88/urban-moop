@@ -13,7 +13,7 @@ const MapEventCard = ({ event, distance, onClose }) => {
     const [overlayMode, setOverlayMode] = useState('none'); // 'none' | 'toast' | 'rating' | 'social' | 'rated'
 
     // Derived Interest State from Context
-    const isSaved = useMemo(() => savedItems.some(i => i.id === event.id), [savedItems, event.id]);
+    const isSaved = useMemo(() => savedItems.some(i => String(i.id) === String(event.id)), [savedItems, event.id]);
 
     // Mock Data for "People Going"
     const attendees = [
