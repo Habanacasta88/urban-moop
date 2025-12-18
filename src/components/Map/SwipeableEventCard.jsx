@@ -116,7 +116,7 @@ export const SwipeableEventCard = ({ event, distance, onNext, onPrev, onClick })
                                 )}
                             </div>
 
-                            <button className="bg-black text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg active:scale-95 transition-transform">
+                            <button className="bg-black text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-lg active:scale-95 transition-transform mr-6 relative z-20">
                                 Ver más
                             </button>
                         </div>
