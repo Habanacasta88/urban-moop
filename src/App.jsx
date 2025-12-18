@@ -224,6 +224,8 @@ function MainApp() {
           onTabChange={handleTabChange}
           onNavigateToMyList={handleNavigateToMyList}
           onNavigateToMoops={handleNavigateToMoops}
+          showOnboardingHint={showMapTooltip}
+          onCloseHint={() => setShowMapTooltip(false)}
         />
       )}
 

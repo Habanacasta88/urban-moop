@@ -11,7 +11,7 @@ import { SwipeableEventCard } from './Map/SwipeableEventCard';
 
 import { FilterModal } from './Map/FilterModal';
 
-export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops }) => {
+export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboardingHint, onCloseHint }) => {
     const { events: fetchedEvents, loading } = useSupabaseMapItems();
     const { openVibeCheck } = useVibe();
     const [activeFilter, setActiveFilter] = useState('todo'); // todo, flash, moop, nuevo, trending
@@ -211,6 +211,33 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops }) => {
                     currentFilters={filters}
                     onApply={setFilters}
                 />
+            </AnimatePresence>
+
+            {/* Onboarding Hint */}
+            <AnimatePresence>
+                {showOnboardingHint && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 20 }}
+                        onAnimationComplete={() => setTimeout(onCloseHint, 2500)}
+                        className="absolute bottom-24 left-4 right-4 z-[45] pointer-events-none"
+                    >
+                        <div className="bg-black/90 text-white p-4 rounded-2xl shadow-2xl border border-white/20 relative">
+                            <div className="flex items-start gap-3">
+                                <span className="text-2xl animate-bounce">👇</span>
+                                <div>
+                                    <h4 className="font-bold text-sm mb-1">👋 Empieza por aquí:</h4>
+                                    <p className="text-xs text-gray-300">
+                                        Mira qué está pasando ahora mismo cerca de ti.
+                                    </p>
+                                </div>
+                            </div>
+                            {/* Arrow pointing down */}
+                            <div className="absolute -bottom-2 left-8 w-4 h-4 bg-black/90 rotate-45 border-r border-b border-white/20"></div>
+                        </div>
+                    </motion.div>
+                )}
             </AnimatePresence>
 
             {/* Bottom Nav */}
