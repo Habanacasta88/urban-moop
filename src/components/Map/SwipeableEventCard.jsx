@@ -83,8 +83,8 @@ export const SwipeableEventCard = ({ event, onNext, onPrev, onClick }) => {
                         <div>
                             {/* Recommendation Label */}
                             <div className="flex items-center gap-1 mb-1">
-                                <span className="text-[9px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded-md border border-indigo-100 uppercase tracking-wide">
-                                    🔥 Recomendado para ti
+                                <span className="text-[9px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md border border-teal-100 uppercase tracking-wide flex items-center gap-1">
+                                    ✨ Recomendado para ti ahora
                                 </span>
                             </div>
 

@@ -88,11 +88,21 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
         return true;
     }).sort((a, b) => {
         // 5. Sorting
-        if (filters.sort === 'distance') {
-            // Mock distance sort if we don't have user location: use alphabetical as fallback or random
-            return 0; // In a real app, calculate distance from userCoords
-        }
-        // Recommended (Default)
+        if (filters.sort === 'distance') return 0;
+
+        // Recommended (Default): Priority -> Moop > Live > Flash > Others
+        if (a.type === 'moop' && b.type !== 'moop') return -1;
+        if (a.type !== 'moop' && b.type === 'moop') return 1;
+
+        // Check for 'live' (mocked logic based on time or badges)
+        const isALive = a.startTime && new Date(a.startTime) <= new Date() && new Date(a.endTime) >= new Date();
+        const isBLive = b.startTime && new Date(b.startTime) <= new Date() && new Date(b.endTime) >= new Date();
+        if (isALive && !isBLive) return -1;
+        if (!isALive && isBLive) return 1;
+
+        if (a.isFlash && !b.isFlash) return -1;
+        if (!a.isFlash && b.isFlash) return 1;
+
         return 0;
     });
 
