@@ -37,10 +37,15 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
 
         // 2. Quick Filters (Top Bar)
         if (activeFilter !== 'todo') {
-            if (activeFilter === 'flash' && !evt.isFlash) return false;
+            if (activeFilter === 'live') {
+                const now = new Date();
+                // Simple live check: start_time <= now <= end_time
+                if (!evt.start_time || !evt.end_time) return false;
+                const start = new Date(evt.start_time);
+                const end = new Date(evt.end_time);
+                if (now < start || now > end) return false;
+            }
             if (activeFilter === 'moop' && evt.type !== 'moop') return false;
-            if (activeFilter === 'trending' && !evt.badges?.includes('Trending')) return false;
-            if (activeFilter === 'nuevo' && !evt.tags?.includes('Nuevo')) return false;
         }
 
         // 3. Modal Filters - Categories
@@ -154,20 +159,39 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
 
                 {/* Filters Horizontal Scroll */}
                 <div className="flex items-center gap-2 overflow-x-auto pb-2 mt-3 pointer-events-auto no-scrollbar scroll-pl-4">
-                    {[
-                        { id: 'todo', label: 'Todo' },
-                        { id: 'flash', label: 'Flash', icon: '⚡' },
-                        { id: 'nuevo', label: 'Nuevo', icon: '✨' },
-                        { id: 'trending', label: 'Trending', icon: '🔥' }
-                    ].map(f => (
+                    <div className="flex items-center gap-2">
+                        {/* Static "Todo" */}
                         <button
-                            key={f.id}
-                            onClick={() => setActiveFilter(f.id)}
-                            className={`px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition-all flex items-center gap-1.5 ${activeFilter === f.id ? 'bg-black text-white scale-105' : 'bg-white text-gray-900 border border-gray-100'}`}
+                            onClick={() => setActiveFilter('todo')}
+                            className={`px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition-all ${activeFilter === 'todo' ? 'bg-black text-white scale-105' : 'bg-white text-gray-900 border border-gray-100'}`}
                         >
-                            {f.icon} {f.label}
+                            Todo
                         </button>
-                    ))}
+
+                        {/* "Ahora" (Live) */}
+                        <button
+                            onClick={() => setActiveFilter('live')}
+                            className={`px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition-all ${activeFilter === 'live' ? 'bg-black text-white scale-105' : 'bg-white text-gray-900 border border-gray-100 text-red-600'}`}
+                        >
+                            🔴 Ahora
+                        </button>
+
+                        {/* "Moops" */}
+                        <button
+                            onClick={() => setActiveFilter('moop')}
+                            className={`px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition-all ${activeFilter === 'moop' ? 'bg-black text-white scale-105' : 'bg-white text-gray-900 border border-gray-100 text-indigo-600'}`}
+                        >
+                            👥 Moops
+                        </button>
+
+                        {/* "Más" (Trigger Modal) */}
+                        <button
+                            onClick={() => setIsFilterModalOpen(true)}
+                            className="px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition-all bg-white text-gray-500 border border-gray-100 flex items-center gap-1 active:scale-95"
+                        >
+                            Más...
+                        </button>
+                    </div>
                 </div>
             </div>
 
