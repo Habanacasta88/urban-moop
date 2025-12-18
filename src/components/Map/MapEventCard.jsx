@@ -4,7 +4,7 @@ import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { useVibe } from '../../context/VibeContext';
 import { useState } from 'react';
 
-const MapEventCard = ({ event, onClose }) => {
+const MapEventCard = ({ event, distance, onClose }) => {
     const { openVibeCheck } = useVibe();
     const [interestState, setInterestState] = useState('none'); // 'none' | 'interested' | 'rating' | 'social'
     const [showToast, setShowToast] = useState(false);
@@ -79,6 +79,7 @@ const MapEventCard = ({ event, onClose }) => {
                             <p className="text-[10px] text-gray-400 font-bold uppercase">Ubicación</p>
                         </div>
                         <p className="text-sm font-bold text-gray-900 line-clamp-2 leading-tight">{event.location?.name || event.location}</p>
+                        {distance && <p className="text-xs text-indigo-600 font-bold mt-0.5">a {distance} de ti</p>}
                     </div>
 
                     {/* Countdown */}

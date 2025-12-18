@@ -139,6 +139,34 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
         return <div className="flex items-center justify-center h-screen bg-gray-100 text-gray-500">Cargando mapa...</div>;
     }
 
+    // Hardcoded User Location (Sabadell Center - Plaça Sant Roc) for MVP
+    const USER_LOCATION = { lat: 41.54329, lng: 2.10942 };
+
+    const calculateDistance = (lat1, lon1, lat2, lon2) => {
+        if (!lat1 || !lon1 || !lat2 || !lon2) return null;
+        const R = 6371; // km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const d = R * c;
+        if (d < 1) return `${Math.round(d * 1000)} m`;
+        return `${d.toFixed(1)} km`;
+    };
+
+    const getEventDistance = (evt) => {
+        if (!evt) return null;
+        // Check if event has lat/lng directly
+        if (evt.lat && evt.lng) {
+            return calculateDistance(USER_LOCATION.lat, USER_LOCATION.lng, evt.lat, evt.lng);
+        }
+        // Fallback or todo: geocode address
+        return null; // "350 m"; // Default fallback if needed for demo
+    };
+
+
     return (
         <div className="relative w-full h-[100dvh] bg-gray-100 overflow-hidden font-sf">
 
@@ -230,6 +258,7 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
                     <SwipeableEventCard
                         key="swipe-card"
                         event={currentSwipeEvent}
+                        distance={getEventDistance(currentSwipeEvent)}
                         onNext={handleNext}
                         onPrev={handlePrev}
                         onClick={() => setSelectedEvent(currentSwipeEvent)}
@@ -242,6 +271,7 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
                 {selectedEvent && (
                     <MapEventCard
                         event={selectedEvent}
+                        distance={getEventDistance(selectedEvent)}
                         onClose={() => setSelectedEvent(null)}
                     />
                 )}

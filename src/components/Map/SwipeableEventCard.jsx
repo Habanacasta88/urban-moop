@@ -1,7 +1,7 @@
 import { motion, useMotionValue, useTransform } from 'motion/react';
 import { MapPin, Users, ChevronRight, ChevronLeft, Zap } from 'lucide-react';
 
-export const SwipeableEventCard = ({ event, onNext, onPrev, onClick }) => {
+export const SwipeableEventCard = ({ event, distance, onNext, onPrev, onClick }) => {
     const x = useMotionValue(0);
     const opacity = useTransform(x, [-100, 0, 100], [0.5, 1, 0.5]);
     const rotate = useTransform(x, [-100, 0, 100], [-5, 0, 5]);
@@ -93,7 +93,10 @@ export const SwipeableEventCard = ({ event, onNext, onPrev, onClick }) => {
                             </h3>
                             <div className="flex items-center gap-1 text-xs text-gray-500 font-medium">
                                 <MapPin size={12} className="text-gray-400" />
-                                <span className="truncate">{event.location?.name || event.location}</span>
+                                <span className="truncate">
+                                    {event.location?.name || event.location}
+                                    {distance && <span className="text-gray-400 font-normal ml-1">· {distance}</span>}
+                                </span>
                             </div>
                         </div>
 
