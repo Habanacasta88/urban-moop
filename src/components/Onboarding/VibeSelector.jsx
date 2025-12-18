@@ -8,7 +8,7 @@ const VibeSelector = ({ onNext, onBack, data }) => {
         { id: 'foodie', label: 'Foodie', icon: '🍕', desc: 'Gastro' },
         { id: 'social', label: 'Social', icon: '👥', desc: 'Gente' },
         { id: 'creativo', label: 'Creativo', icon: '🎨', desc: 'Arte' },
-        { id: 'sorpresa', label: 'Sorpresa', icon: '🎲', desc: 'Random' },
+        { id: 'sorpresa', label: 'Sorpréndeme', icon: '🎲', desc: 'Random' },
     ];
 
     const [selectedVibes, setSelectedVibes] = useState(data.vibes || []);
