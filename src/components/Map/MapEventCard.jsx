@@ -1,10 +1,43 @@
-import { Heart, Clock, Users, ChevronLeft, ChevronRight, X, MapPin, Star, Bookmark, Share2, Zap, Activity } from 'lucide-react';
-import { motion } from 'motion/react';
+import { Heart, Clock, Users, ChevronLeft, ChevronRight, X, MapPin, Star, Bookmark, Share2, Zap, Activity, Check } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { useVibe } from '../../context/VibeContext';
+import { useState } from 'react';
 
 const MapEventCard = ({ event, onClose }) => {
     const { openVibeCheck } = useVibe();
+    const [interestState, setInterestState] = useState('none'); // 'none' | 'interested' | 'rating' | 'social'
+    const [showToast, setShowToast] = useState(false);
+
+    // Mock Data for "People Going"
+    const attendees = [
+        { id: 1, name: 'Laura', vibe: '😌', distance: '300 m', avatar: 'https://i.pravatar.cc/150?u=1' },
+        { id: 2, name: 'Marc', vibe: '🔥', distance: '150 m', avatar: 'https://i.pravatar.cc/150?u=2' },
+        { id: 3, name: 'Sonia', vibe: '🙂', distance: '500 m', avatar: 'https://i.pravatar.cc/150?u=3' },
+        { id: 4, name: 'Pol', vibe: '🤯', distance: '600 m', avatar: 'https://i.pravatar.cc/150?u=4' },
+    ];
+
+    const handleInterestClick = () => {
+        setInterestState('interested');
+        setShowToast(true);
+        // In a real app, this would trigger an API call to follow/interest
+    };
+
+    const handleRateClick = () => {
+        setInterestState('rating');
+        setShowToast(false);
+    };
+
+    const handleSocialClick = () => {
+        setInterestState('social');
+        setShowToast(false);
+    };
+
+    const handleVibeSubmit = (vibe) => {
+        setInterestState('rated'); // Or back to interested
+        // Show confirmation or close
+        setTimeout(() => onClose(), 1500); // Close card after rating for "Habit Loop" effect
+    };
 
     if (!event) return null;
 
@@ -17,108 +50,248 @@ const MapEventCard = ({ event, onClose }) => {
             className="absolute top-0 left-0 right-0 bottom-0 bg-white z-[2000] overflow-y-auto"
         >
             {/* Header Image */}
-            <div className="relative h-64 bg-gray-200">
-                <ImageWithFallback src={event.image} alt={event.title} className="w-full h-full object-cover" />
-                <button onClick={onClose} className="absolute top-4 right-4 w-10 h-10 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-white hover:bg-white/40">
+            <div className="relative h-72 bg-gray-200">
+                <ImageWithFallback src={event.image || event.imageUrl} alt={event.title} className="w-full h-full object-cover" />
+                <button onClick={onClose} className="absolute top-4 right-4 w-10 h-10 bg-black/20 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-black/40 transition-colors z-10">
                     <X size={20} />
                 </button>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+
+                <div className="absolute bottom-6 left-6 right-6 text-white">
+                    <div className="flex items-center gap-2 mb-2">
+                        <span className="text-3xl">{event.emoji}</span>
+                        <span className="bg-white/20 backdrop-blur-sm text-white px-3 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wide border border-white/30">
+                            {event.category || 'Evento'}
+                        </span>
+                    </div>
+                    <h1 className="text-3xl font-black leading-tight mb-1 shadow-sm">{event.title}</h1>
+                </div>
             </div>
 
-            <div className="relative -mt-6 bg-white rounded-t-3xl p-6 min-h-[500px] pb-64">
-                {/* Drag Handle */}
-                <div className="w-12 h-1 bg-gray-200 rounded-full mx-auto mb-6" />
-
-                <div className="flex items-start justify-between mb-4">
-                    <div>
-                        <span className="text-3xl mr-2">{event.emoji}</span>
-                        <span className="bg-purple-100 text-purple-600 px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wide">{event.category}</span>
-                    </div>
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => openVibeCheck('local', event.id, event.title)}
-                            className="p-2 rounded-full bg-yellow-50 hover:bg-yellow-100 text-yellow-500 border border-yellow-200"
-                        >
-                            <Zap size={18} fill="currentColor" />
-                        </button>
-                        <button className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"><Share2 size={18} /></button>
-                        <button className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"><Bookmark size={18} /></button>
-                    </div>
-                </div>
-
-                <h1 className="text-2xl font-bold text-gray-900 mb-2 leading-tight">{event.title}</h1>
-                <p className="text-gray-600 leading-relaxed mb-6">{event.description}</p>
+            <div className="relative bg-white -mt-4 rounded-t-3xl px-6 pt-8 min-h-[500px] pb-32">
 
                 {/* Info Blocks */}
                 <div className="grid grid-cols-2 gap-3 mb-8">
-                    <div className="bg-gray-50 p-3 rounded-2xl flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-500"><MapPin size={16} /></div>
-                        <div>
+                    {/* Location */}
+                    <div className="bg-gray-50 p-3 rounded-2xl flex flex-col gap-1 border border-gray-100">
+                        <div className="flex items-center gap-2 mb-1">
+                            <MapPin size={14} className="text-gray-400" />
                             <p className="text-[10px] text-gray-400 font-bold uppercase">Ubicación</p>
-                            <p className="text-sm font-semibold text-gray-800 line-clamp-1">{event.location}</p>
                         </div>
+                        <p className="text-sm font-bold text-gray-900 line-clamp-2 leading-tight">{event.location?.name || event.location}</p>
                     </div>
-                    <div className="bg-gray-50 p-3 rounded-2xl flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-500"><Clock size={16} /></div>
-                        <div>
+
+                    {/* Countdown */}
+                    <div className="bg-gray-50 p-3 rounded-2xl flex flex-col gap-1 border border-gray-100">
+                        <div className="flex items-center gap-2 mb-1">
+                            <Clock size={14} className="text-orange-500" />
                             <p className="text-[10px] text-gray-400 font-bold uppercase">Tiempo</p>
-                            <p className="text-sm font-semibold text-gray-800 line-clamp-1">{event.time}</p>
+                        </div>
+                        <p className="text-sm font-bold text-gray-900">Quedan 2h 39min</p>
+                    </div>
+
+                    {/* Live Attendees */}
+                    <div className="col-span-2 bg-indigo-50 p-4 rounded-2xl flex items-center justify-between border border-indigo-100">
+                        <div className="flex items-center gap-3">
+                            <div className="relative">
+                                <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                                </span>
+                                <Users size={18} className="text-indigo-600" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-bold text-indigo-900 leading-none">12 personas ya están yendo</p>
+                                <p className="text-[10px] text-indigo-600 font-medium mt-0.5 opacity-80">Gente del barrio como tú</p>
+                            </div>
+                        </div>
+                        {/* Avatar Stack */}
+                        <div className="flex -space-x-2">
+                            {attendees.slice(0, 3).map(u => (
+                                <img key={u.id} src={u.avatar} alt={u.name} className="w-8 h-8 rounded-full border-2 border-white object-cover" />
+                            ))}
+                            <div className="w-8 h-8 rounded-full bg-indigo-200 border-2 border-white flex items-center justify-center text-[10px] font-bold text-indigo-700">
+                                +9
+                            </div>
                         </div>
                     </div>
-                    <div className="col-span-2 bg-gray-50 p-3 rounded-2xl flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center text-rose-500"><Users size={16} /></div>
+                </div>
+
+                {/* Description */}
+                <div className="mb-8">
+                    <h3 className="font-bold text-gray-900 mb-2">Sobre este plan</h3>
+                    <p className="text-gray-600 text-sm leading-relaxed">{event.description}</p>
+                </div>
+
+                {/* Secondary CTA: Vibe Check */}
+                <div
+                    onClick={handleRateClick}
+                    className="bg-white border border-gray-100 shadow-sm rounded-xl p-4 flex items-center justify-between cursor-pointer active:scale-95 transition-transform mb-24"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-yellow-50 flex items-center justify-center text-yellow-600">
+                            <Zap size={20} fill="currentColor" />
+                        </div>
                         <div>
-                            <p className="text-[10px] text-gray-400 font-bold uppercase">Asistentes</p>
-                            <div className="flex items-center gap-2">
-                                <p className="text-sm font-semibold text-gray-800">{event.attendees} personas van</p>
-                                <div className="flex -space-x-2">
-                                    {[1, 2, 3].map(i => <div key={i} className="w-5 h-5 rounded-full bg-gray-300 border-2 border-white" />)}
+                            <p className="text-sm font-bold text-gray-900">¿Cómo está el ambiente?</p>
+                            <p className="text-[11px] text-gray-500">Tu opinión ayuda en tiempo real</p>
+                        </div>
+                    </div>
+                    <ChevronRight size={18} className="text-gray-300" />
+                </div>
+
+            </div>
+
+            {/* FIXED BOTTOM CTA */}
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100 z-[2010] pb-8">
+                <button
+                    onClick={handleInterestClick}
+                    disabled={interestState === 'interested'}
+                    className={`w-full font-bold py-4 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all transform active:scale-95 ${interestState === 'interested' ? 'bg-green-100 text-green-700 shadow-none' : 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/30'}`}
+                >
+                    {interestState === 'interested' ? (
+                        <>
+                            <Check size={20} />
+                            Te avisaremos
+                        </>
+                    ) : (
+                        <>
+                            <Star size={20} fill="currentColor" className="text-white opacity-90" />
+                            Me interesa
+                        </>
+                    )}
+                </button>
+                <p className="text-center text-[11px] text-gray-400 mt-2 font-medium">
+                    No te compromete. Te avisamos si el plan se mueve.
+                </p>
+            </div>
+
+            {/* TOAST OVERLAY (State 1) */}
+            <AnimatePresence>
+                {showToast && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 50 }}
+                        className="fixed bottom-32 left-4 right-4 z-[2020]"
+                    >
+                        <div className="bg-gray-900 text-white p-5 rounded-2xl shadow-2xl">
+                            <div className="flex items-start gap-4 mb-4">
+                                <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-black flex-shrink-0">
+                                    <Check size={18} strokeWidth={3} />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-sm mb-1">Listo. Te avisamos si pasa algo.</h3>
+                                    <p className="text-xs text-gray-400 leading-relaxed">Este plan está activo. Puedes ir cuando quieras.</p>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Vibe Status Section - NEW */}
-                <div className="bg-gradient-to-br from-primary/10 to-transparent rounded-2xl p-4 mb-8 border border-primary/20">
-                    <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-primary shadow-sm">
-                                <Zap size={16} fill="currentColor" />
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={handleRateClick}
+                                    className="flex-1 bg-white text-black text-xs font-bold py-3 rounded-lg flex items-center justify-center gap-1.5 active:scale-95 transition-transform"
+                                >
+                                    <Zap size={14} fill="currentColor" className="text-yellow-500" />
+                                    Valorar ambiente
+                                </button>
+                                <button
+                                    onClick={handleSocialClick}
+                                    className="flex-1 bg-gray-800 text-white text-xs font-bold py-3 rounded-lg active:scale-95 transition-transform"
+                                >
+                                    Ver quién va
+                                </button>
                             </div>
-                            <span className="font-bold text-gray-900">Vibe Actual</span>
                         </div>
-                        <span className="text-xs font-bold bg-white text-primary px-2 py-1 rounded-lg border border-primary/20 shadow-sm">
-                            🔥 A tope
-                        </span>
-                    </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
-                    <div className="flex gap-1 mb-4">
-                        <div className="h-1.5 flex-1 bg-primary rounded-full"></div>
-                        <div className="h-1.5 flex-1 bg-primary rounded-full"></div>
-                        <div className="h-1.5 flex-1 bg-primary/30 rounded-full"></div>
-                        <div className="h-1.5 flex-1 bg-primary/30 rounded-full"></div>
-                    </div>
-
-                    <button
-                        onClick={() => openVibeCheck('local', event.id, event.title)}
-                        className="w-full bg-white hover:bg-gray-50 text-secondary font-bold py-3 rounded-xl border border-secondary shadow-sm transition-all flex items-center justify-center gap-2"
+            {/* VIBE RATING MODAL (State 2) */}
+            <AnimatePresence>
+                {interestState === 'rating' && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[2030] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4"
+                        onClick={() => setInterestState('none')}
                     >
-                        <Activity size={18} />
-                        Valorar el ambiente
-                    </button>
-                    <p className="text-center text-[10px] text-gray-400 mt-2">
-                        Tu opinión ayuda a otros en tiempo real.
-                    </p>
-                </div>
+                        <motion.div
+                            initial={{ y: 100 }}
+                            animate={{ y: 0 }}
+                            exit={{ y: 100 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white w-full max-w-sm rounded-3xl p-6"
+                        >
+                            <div className="text-center mb-6">
+                                <Zap size={32} className="text-yellow-500 fill-yellow-500 mx-auto mb-3" />
+                                <h3 className="font-bold text-xl text-gray-900 mb-1">¿Cómo está el ambiente?</h3>
+                                <p className="text-sm text-gray-500">Marca lo que sientes. Se actualiza ya.</p>
+                            </div>
 
-                {/* Primary Action Button */}
-                <div className="fixed bottom-28 left-6 right-6 z-50">
-                    <button className="w-full bg-secondary hover:bg-orange-600 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 shadow-xl shadow-orange-500/20 transition-all transform active:scale-95">
-                        <Star size={20} fill="currentColor" className="text-white" />
-                        ¡Me interesa!
-                    </button>
-                </div>
-            </div>
+                            <div className="grid grid-cols-1 gap-2">
+                                {[
+                                    { label: '😌 Tranquilo', id: 'chill' },
+                                    { label: '🙂 Buen rollo', id: 'good' },
+                                    { label: '🔥 A tope', id: 'fire' },
+                                    { label: '🤯 Muy lleno', id: 'full' },
+                                    { label: '😕 Flojo', id: 'meh' }
+                                ].map((opt) => (
+                                    <button
+                                        key={opt.id}
+                                        onClick={() => handleVibeSubmit(opt.id)}
+                                        className="w-full bg-gray-50 hover:bg-gray-100 text-left px-5 py-4 rounded-xl font-bold text-gray-800 flex items-center justify-between active:scale-95 transition-transform"
+                                    >
+                                        <span>{opt.label}</span>
+                                        <ChevronRight size={16} className="text-gray-300" />
+                                    </button>
+                                ))}
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* SOCIAL LIST MODAL (State 3) */}
+            <AnimatePresence>
+                {interestState === 'social' && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[2030] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4"
+                        onClick={() => setInterestState('none')}
+                    >
+                        <motion.div
+                            initial={{ y: 100 }}
+                            animate={{ y: 0 }}
+                            exit={{ y: 100 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white w-full max-w-sm rounded-3xl p-6 min-h-[50vh]"
+                        >
+                            <div className="flex items-center justify-between mb-6">
+                                <h3 className="font-bold text-lg text-gray-900">👥 Personas interesadas</h3>
+                                <button onClick={() => setInterestState('interested')} className="p-2 bg-gray-100 rounded-full"><X size={16} /></button>
+                            </div>
+
+                            <div className="space-y-4">
+                                {attendees.map(user => (
+                                    <div key={user.id} className="flex items-center gap-3">
+                                        <div className="relative">
+                                            <img src={user.avatar} alt={user.name} className="w-10 h-10 rounded-full object-cover border border-gray-100" />
+                                            <span className="absolute -bottom-1 -right-1 text-xs">{user.vibe}</span>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold text-gray-900">{user.name}</p>
+                                            <p className="text-xs text-indigo-500 font-medium">a {user.distance}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
         </motion.div>
     );
 };
