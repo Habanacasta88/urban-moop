@@ -35,7 +35,11 @@ export const AuthProvider = ({ children }) => {
                 redirectTo: window.location.origin
             }
         });
-        if (error) throw error;
+        console.log('Google Auth Redirecting to:', window.location.origin);
+        if (error) {
+            console.error('Supabase Auth Error:', error.message);
+            throw error;
+        }
     };
 
     // Fallback: Magic Link or Email/Pass if preferred later

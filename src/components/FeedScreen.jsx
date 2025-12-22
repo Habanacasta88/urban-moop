@@ -1,123 +1,21 @@
-
+// ... imports
 import { useState, useMemo } from 'react';
-import { Filter, Flame, MapPin, Zap, Music, Coffee } from 'lucide-react';
+import { Filter, Flame, MapPin, Zap, Music, Coffee, Search, Globe, Sparkles } from 'lucide-react'; // Added Icons
 import { motion, AnimatePresence } from 'motion/react';
 import BottomNavigation from './Navigation/BottomNavigation';
 import { EventDetailScreen } from './EventDetailScreen';
 import { LiveCard, SocialCard, FlashCard, DiscoverCard } from './Feed/FeedCards';
 import { getSmartFeed } from '../utils/feedAlgorithm';
+import { SearchService } from '../services/SearchService'; // Added Service
 
-// --- ENRICHED MOCK DATA (Single Source) ---
-const RAW_FEED_ITEMS = [
-    // LIVE (High Value)
-    {
-        id: 'live-1',
-        type: 'live',
-        title: 'Cañas Afterwork',
-        imageUrl: 'https://images.unsplash.com/photo-1572116469696-9a04635e02e2?w=1080',
-        business: { name: 'Bar La Plaza' },
-        location: { distance: '120 m' }, // Very close
-        attendees: 12, // Popular
-        endsIn: '2 h',
-        description: 'El ambiente está animándose. Perfectas para desconectar.',
-    },
-    {
-        id: 'live-2',
-        type: 'live',
-        title: 'Concierto Jazz Improvisado',
-        imageUrl: '/feed/jazz.png',
-        business: { name: 'Jazz Club' },
-        location: { distance: '450 m' },
-        attendees: 8,
-        endsIn: '3 h',
-    },
-
-    // SOCIAL MOOPS
-    {
-        id: 'moop-1',
-        type: 'moop',
-        title: 'Café & charla creativa',
-        creator: { name: 'Ana', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100' },
-        location: { distance: '300 m' },
-        attendees: 6,
-        time: 'En 1 h',
-        category: 'social',
-        vibe: '😌',
-    },
-    {
-        id: 'moop-2',
-        type: 'moop',
-        title: 'Running suave 5k',
-        creator: { name: 'Pol', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100' },
-        location: { distance: '800 m' },
-        attendees: 3,
-        time: 'En 30 min',
-        category: 'sport',
-        vibe: '⚡',
-    },
-    {
-        id: 'moop-3',
-        type: 'moop',
-        title: 'Paseo de Perros',
-        creator: { name: 'Laura', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100' },
-        location: { distance: '500 m' },
-        attendees: 4,
-        time: 'En 15 min',
-        category: 'social',
-        imageUrl: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1080',
-        vibe: '🐶'
-    },
-
-    // FLASH (Urgency)
-    {
-        id: 'flash-1',
-        type: 'flash',
-        title: '2x1 Cervezas Artesana',
-        imageUrl: 'https://images.unsplash.com/photo-1518176258769-f227c798150e?w=1080',
-        business: { name: 'Hoppy Craft' },
-        endsIn: '45 min',  // Urgent
-        location: { distance: '250 m' }, // Close
-        category: 'drink'
-    },
-    {
-        id: 'flash-2',
-        type: 'flash',
-        title: 'Tapas Gratis con Vermut',
-        imageUrl: 'https://images.unsplash.com/photo-1541544744-37570a19a225?w=1080',
-        business: { name: 'Bodega 1900' },
-        endsIn: '1h 20m',
-        location: { distance: '600 m' },
-        category: 'food'
-    },
-
-    // DISCOVER
-    {
-        id: 'new-1',
-        type: 'new',
-        title: 'SkyBar SBD',
-        imageUrl: '/feed/rooftop.png',
-        location: { distance: '1.2 km' },
-        description: 'El nuevo rooftop con las mejores vistas de la ciudad.',
-        isNew: true,
-        likes: 120
-    },
-    {
-        id: 'event-3',
-        type: 'event', // Treated as discover base
-        title: 'Exposición Arte Urbano',
-        imageUrl: 'https://images.unsplash.com/photo-1499781350541-7783f6c6a0c8?w=1080',
-        location: { distance: '500 m' },
-        description: 'Murales en vivo y DJs locales.',
-        likes: 60
-    }
-];
+// ... RAW_FEED_ITEMS (keep as is)
 
 const QuickFilter = ({ label, active, onClick }) => (
     <button
         onClick={onClick}
         className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 border ${active
-            ? 'bg-brand-600 text-white border-brand-600 shadow-lg shadow-brand-500/20' // Active: Brand Purple (Gradient-ish via solid for now or use bg-[image:var(--cta-gradient)])
-            : 'bg-surface text-text-2 border-border hover:bg-surface-2 hover:border-brand-200' // Inactive: Light Gray
+            ? 'bg-brand-600 text-white border-brand-600 shadow-lg shadow-brand-500/20'
+            : 'bg-surface text-text-2 border-border hover:bg-surface-2 hover:border-brand-200'
             } `}
     >
         {label}
@@ -128,20 +26,46 @@ export const FeedScreen = ({ activeTab, onTabChange }) => {
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [activeFilter, setActiveFilter] = useState('Para ti');
 
+    // Search State
+    const [searchQuery, setSearchQuery] = useState('');
+    const [isSearching, setIsSearching] = useState(false); // UI state
+    const [searchLoading, setSearchLoading] = useState(false);
+    const [searchResults, setSearchResults] = useState(null);
+
+    // SEARCH HANDLER
+    const handleSearch = async (e) => {
+        if (e.key === 'Enter' && searchQuery.trim()) {
+            setSearchLoading(true);
+            setSearchResults(null);
+            try {
+                // Call Edge Function
+                const response = await SearchService.search(searchQuery);
+                setSearchResults(response);
+            } catch (err) {
+                console.error("Search failed", err);
+                // Fallback / Error state
+            } finally {
+                setSearchLoading(false);
+            }
+        }
+    };
+
     // ALGORITHM CORE
     const feedItems = useMemo(() => {
+        // If searching, show nothing here (handled in render) or filter local if needed
+        // For now, we prefer replacing the feed with search results.
+
         // 1. Get Smart Sorted Feed
         let items = getSmartFeed(RAW_FEED_ITEMS);
 
-        // 2. Apply Manual Filters (On top of smart order)
-        if (activeFilter === 'Para ti') return items; // Default Smart Order
-
+        // 2. Apply Manual Filters
+        if (activeFilter === 'Para ti') return items;
         if (activeFilter === 'Moops') return items.filter(i => i.type === 'moop');
         if (activeFilter === 'Flash') return items.filter(i => i.type === 'flash');
         if (activeFilter === 'Comer') return items.filter(i => i.category === 'food' || i.category === 'drink');
 
         return items;
-    }, [activeFilter]);
+    }, [activeFilter, RAW_FEED_ITEMS]);
 
     // RENDER FACTORY
     const renderCard = (item) => {
@@ -160,49 +84,159 @@ export const FeedScreen = ({ activeTab, onTabChange }) => {
         <div className="relative w-full min-h-screen bg-bg pb-24 font-sf text-text">
 
             {/* 1. HEADER (Fixed) */}
-            <div className="sticky top-0 z-30 bg-bg/95 backdrop-blur-xl border-b border-border pb-2">
-                <div className="px-5 pt-14 pb-3 flex justify-between items-start">
-                    <div>
-                        <div className="flex items-center gap-2 mb-0.5">
-                            <span className="relative flex h-2 w-2">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-600"></span>
-                            </span>
-                            <h2 className="text-xs font-bold text-brand-700 uppercase tracking-widest">Live ahora · Sabadell</h2>
+            <div className="sticky top-0 z-30 bg-bg/95 backdrop-blur-xl border-b border-border pb-2 transition-all">
+                <div className="px-5 pt-14 pb-3">
+                    {/* Dynamic Header: Smart Radar OR Search Bar */}
+                    {!isSearching ? (
+                        <div className="flex justify-between items-start transition-all">
+                            <div>
+                                <div className="flex items-center gap-2 mb-0.5">
+                                    <span className="relative flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-600"></span>
+                                    </span>
+                                    <h2 className="text-xs font-bold text-brand-700 uppercase tracking-widest">Live ahora · Sabadell</h2>
+                                </div>
+                                <h1 className="text-xl font-black text-brand-700 leading-tight">
+                                    Smart Radar
+                                </h1>
+                            </div>
+                            <button
+                                onClick={() => setIsSearching(true)}
+                                className="w-10 h-10 flex items-center justify-center rounded-full bg-surface border border-border text-muted hover:text-brand-600 hover:border-brand-200 transition-all shadow-sm"
+                            >
+                                <Search size={20} />
+                            </button>
                         </div>
-                        <h1 className="text-xl font-black text-brand-700 leading-tight">
-                            Smart Radar
-                        </h1>
-                    </div>
+                    ) : (
+                        <div className="relative flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                            <div className="relative flex-1">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-500" size={18} />
+                                <input
+                                    type="text"
+                                    autoFocus
+                                    placeholder="¿Qué te apetece hoy? (ej: cena romántica)"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onKeyDown={handleSearch}
+                                    className="w-full pl-10 pr-4 py-3 bg-surface rounded-xl border border-brand-200 text-text font-medium placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 shadow-lg shadow-brand-500/5"
+                                />
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setIsSearching(false);
+                                    setSearchResults(null);
+                                    setSearchQuery('');
+                                }}
+                                className="text-sm font-bold text-muted hover:text-text px-2"
+                            >
+                                Cancelar
+                            </button>
+                        </div>
+                    )}
                 </div>
 
-                {/* Quick Filters */}
-                <div className="flex gap-2 overflow-x-auto px-5 pb-2 no-scrollbar scroll-pl-5">
-                    <QuickFilter label="⚡ Para ti" active={activeFilter === 'Para ti'} onClick={() => setActiveFilter('Para ti')} />
-                    <QuickFilter label="👥 Moops" active={activeFilter === 'Moops'} onClick={() => setActiveFilter('Moops')} />
-                    <QuickFilter label="🍔 Comer" active={activeFilter === 'Comer'} onClick={() => setActiveFilter('Comer')} />
-                    <QuickFilter label="⚡ Flash" active={activeFilter === 'Flash'} onClick={() => setActiveFilter('Flash')} />
-                </div>
+                {/* Quick Filters (Hide if searching/results active?) -> Maybe keep them as fallback context */}
+                {!isSearching && (
+                    <div className="flex gap-2 overflow-x-auto px-5 pb-2 no-scrollbar scroll-pl-5">
+                        <QuickFilter label="⚡ Para ti" active={activeFilter === 'Para ti'} onClick={() => setActiveFilter('Para ti')} />
+                        <QuickFilter label="👥 Moops" active={activeFilter === 'Moops'} onClick={() => setActiveFilter('Moops')} />
+                        <QuickFilter label="🍔 Comer" active={activeFilter === 'Comer'} onClick={() => setActiveFilter('Comer')} />
+                        <QuickFilter label="⚡ Flash" active={activeFilter === 'Flash'} onClick={() => setActiveFilter('Flash')} />
+                    </div>
+                )}
             </div>
 
-            {/* 2. SMART FEED LIST */}
-            <div className="px-4 pt-4 pb-10">
-                {/* Debug Info (Optional - remove for prod) */}
-                {/* <div className="mb-4 text-[10px] text-gray-500 font-mono">
-                    Algorithm: Score DESC + Diversity (Max 2 same)
-                </div> */}
+            {/* 2. FEED CONTENT or SEARCH RESULTS */}
+            <div className="px-4 pt-4 pb-10 min-h-[50vh]">
 
-                {feedItems.map(item => (
-                    // Wrapper for layout margins if needed
-                    <div key={item.id} className="mb-0">
-                        {renderCard(item)}
+                {/* A. SEARCH RESULTS MODE */}
+                {isSearching && (
+                    <div className="space-y-4">
+                        {/* Loading State */}
+                        {searchLoading && (
+                            <div className="flex flex-col items-center justify-center py-10 text-center space-y-4">
+                                <div className="w-12 h-12 rounded-full border-4 border-brand-100 border-t-brand-600 animate-spin"></div>
+                                <div>
+                                    <p className="font-bold text-brand-700">Explorando la ciudad...</p>
+                                    <p className="text-xs text-muted">Buscando las mejores vibras para ti.</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Results */}
+                        {!searchLoading && searchResults && (
+                            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                {/* Result Header */}
+                                <div className="flex items-center justify-between mb-4 px-1">
+                                    <h3 className="font-bold text-text flex items-center gap-2">
+                                        <Sparkles size={16} className="text-brand-500" />
+                                        Resultados para "{searchQuery}"
+                                    </h3>
+                                    {searchResults.source === 'external' && (
+                                        <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded border border-blue-100 font-bold flex items-center gap-1">
+                                            <Globe size={10} /> Web Search
+                                        </span>
+                                    )}
+                                </div>
+
+                                {/* List */}
+                                {searchResults.results.length > 0 ? (
+                                    searchResults.results.map((item, idx) => (
+                                        <div key={idx} className="mb-4">
+                                            {/* Reuse DiscoverCard style structure but adapted for simple search result */}
+                                            <div className="bg-white rounded-2xl p-3 shadow-lg border border-border flex gap-3 group active:scale-98 transition-transform">
+                                                <div className="w-20 h-24 rounded-xl bg-gray-100 shrink-0 overflow-hidden relative">
+                                                    <img
+                                                        src={item.image_url || `https://source.unsplash.com/random/200x200?${item.category || 'place'}`}
+                                                        alt={item.name}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                </div>
+                                                <div className="flex-1 flex flex-col justify-between py-1">
+                                                    <div>
+                                                        <h4 className="font-black text-text leading-tight mb-1">{item.name}</h4>
+                                                        <p className="text-xs text-muted line-clamp-2">{item.description}</p>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 mt-2">
+                                                        <span className="text-[10px] font-bold bg-brand-50 text-brand-700 px-2 py-0.5 rounded border border-brand-100">
+                                                            {(item.match_score * 100).toFixed(0)}% Match
+                                                        </span>
+                                                        {item.is_external && (
+                                                            <span className="text-[10px] font-bold text-blue-500 flex items-center gap-1">
+                                                                <Globe size={10} /> Web
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="text-center py-10 p-6 bg-surface rounded-3xl border border-dashed border-border mx-2">
+                                        <p className="text-sm font-medium text-text">No encontramos nada exacto.</p>
+                                        <p className="text-xs text-muted mt-1">Prueba con palabras clave diferentes.</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
-                ))}
+                )}
 
-                {/* Empty State / End */}
-                <div className="text-center py-8 opacity-50">
-                    <p className="text-xs text-gray-500 font-medium">Estás al día.<br />Sal y disfruta.</p>
-                </div>
+                {/* B. NORMAL FEED MODE */}
+                {!isSearching && (
+                    <>
+                        {feedItems.map(item => (
+                            <div key={item.id} className="mb-0">
+                                {renderCard(item)}
+                            </div>
+                        ))}
+
+                        <div className="text-center py-8 opacity-50">
+                            <p className="text-xs text-gray-500 font-medium">Estás al día.<br />Sal y disfruta.</p>
+                        </div>
+                    </>
+                )}
             </div>
 
             {/* 3. BOTTOM BAR */}
