@@ -8,7 +8,48 @@ import { LiveCard, SocialCard, FlashCard, DiscoverCard } from './Feed/FeedCards'
 import { getSmartFeed } from '../utils/feedAlgorithm';
 import { SearchService } from '../services/SearchService'; // Added Service
 
-// ... RAW_FEED_ITEMS (keep as is)
+// Hardcoded Mock Data for Feed
+const RAW_FEED_ITEMS = [
+    {
+        id: '1',
+        type: 'live',
+        title: 'Jazz Night & Cocktails',
+        place: 'Blue Note Club',
+        distance: '0.4 km',
+        attendees: 12,
+        image_url: 'https://images.unsplash.com/photo-1514525253440-b393452de23e?q=80&w=1000',
+        vibes: ['chill', 'music'],
+        startTime: new Date().toISOString(),
+        endTime: new Date(Date.now() + 7200000).toISOString()
+    },
+    {
+        id: '2',
+        type: 'moop',
+        user: { name: 'Carla', avatar: 'https://i.pravatar.cc/150?u=carla' },
+        action: 'va a',
+        target: 'Mercat Central',
+        time: 'hace 5 min',
+        comment: '¡Alguien para unos pinchos? 🍢',
+        place_image: 'https://images.unsplash.com/photo-1533900298318-6b8da08a523e?q=80&w=1000'
+    },
+    {
+        id: '3',
+        type: 'flash',
+        title: '2x1 en Mojitos 🍹',
+        place: 'La Terraza',
+        timeLeft: '45m',
+        distance: '0.2 km',
+        image_url: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=1000'
+    },
+    {
+        id: '4',
+        type: 'new',
+        title: 'Nuevo: "El Taller"',
+        description: 'Tapas creativas en el centro.',
+        image_url: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1000',
+        rating: 4.8
+    }
+];
 
 const QuickFilter = ({ label, active, onClick }) => (
     <button

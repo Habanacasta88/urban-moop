@@ -24,7 +24,7 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
 
     // Filter Logic
     const filteredEvents = fetchedEvents.filter(evt => {
-        // 1. Text Search
+        // 1. Text Search (Legacy)
         if (searchQuery) {
             const query = searchQuery.toLowerCase();
             const matchesText =
