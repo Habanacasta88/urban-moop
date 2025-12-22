@@ -221,8 +221,17 @@ export const FeedScreen = ({ activeTab, onTabChange }) => {
                                     )}
                                 </div>
 
+                                {searchResults.message && !searchResults.results && (
+                                    <div className="bg-green-50 border border-green-200 rounded-2xl p-4 mb-4 text-center animate-in fade-in zoom-in">
+                                        <div className="text-3xl mb-2">🌱</div>
+                                        <h3 className="font-bold text-green-800">Sistema Actualizado</h3>
+                                        <p className="text-sm text-green-700">{searchResults.message}</p>
+                                        <p className="text-xs text-green-600 mt-2">Ahora borra "!SEED" y busca algo normal.</p>
+                                    </div>
+                                )}
+
                                 {/* List */}
-                                {searchResults.results.length > 0 ? (
+                                {searchResults.results && searchResults.results.length > 0 ? (
                                     searchResults.results.map((item, idx) => (
                                         <div key={idx} className="mb-4">
                                             {/* Reuse DiscoverCard style structure but adapted for simple search result */}
