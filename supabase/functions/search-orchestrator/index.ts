@@ -53,12 +53,10 @@ Deno.serve(async (req) => {
         const embedding = resultEmbedding.embedding.values;
 
         // 4. Internal Search (Supabase RPC)
-        const { data: internalResults, error: rpcError } = await supabase.rpc('search_venues', {
+        const { data: internalResults, error: rpcError } = await supabase.rpc('search_map_items', {
             query_embedding: embedding,
-            match_threshold: 0.5, // Lowered threshold for testing
-            match_count: 5,
-            filter_vibes: null,
-            filter_price_max: null
+            match_threshold: 0.1, // Ultra-low threshold to verify ANY data
+            match_count: 5
         })
 
         if (rpcError) {
@@ -104,62 +102,45 @@ async function handleSeeding(req: Request) {
     const genAI = new GoogleGenerativeAI(geminiKey);
     const model = genAI.getGenerativeModel({ model: 'text-embedding-004' });
 
-    const SAMPLE_VENUES = [
-        {
-            name: "Biblioteca Vapor Badia",
-            description: "Un sitio tranquilo para leer y estudiar con silencio absoluto. Ideal para concentrarse.",
-            category: "culture",
-            vibes: ["quiet", "study", "chill"],
-            price_level: 0,
-            location: "Carrer de les Tres Creus, Sabadell"
-        },
-        {
-            name: "Bar La Terraza 2",
-            description: "Terraza animada para tomar algo con amigos. Música alta y ambiente festivo.",
-            category: "bar",
-            vibes: ["party", "social", "music"],
-            price_level: 2,
-            location: "Plaça Major, Sabadell"
-        },
-        {
-            name: "Parc Catalunya",
-            description: "Gran parque verde para pasear al perro, hacer picnic o salir con niños.",
-            category: "park",
-            vibes: ["nature", "kids", "pet_friendly"],
-            price_level: 0,
-            location: "Eix Macià, Sabadell"
-        },
-        {
-            name: "Cines Imperial",
-            description: "Cine clásico en el centro. Perfecto para una cita romántica o ver estrenos.",
-            category: "cinema",
-            vibes: ["romantic", "movie", "indoor"],
-            price_level: 2,
-            location: "Rambla, Sabadell"
-        }
-    ];
+    // 1. Fetch existing items that need embedding
+    // For now, just fetch recent 50 items to ensure we cover the map
+    const { data: items, error: fetchError } = await supabase
+        .from('map_items')
+        .select('id, title, description, category, tags')
+        .limit(50);
+
+    if (fetchError) throw new Error(`Fetch Error: ${fetchError.message}`);
+    if (!items || items.length === 0) return new Response(JSON.stringify({ message: "No items to seed" }), { headers: corsHeaders });
 
     const results = [];
 
-    for (const venue of SAMPLE_VENUES) {
-        // Generate embedding
-        const embeddingResult = await model.embedContent(`${venue.name}: ${venue.description} ${venue.vibes.join(' ')}`);
-        const embedding = embeddingResult.embedding.values;
+    // 2. Generate and Update
+    for (const item of items) {
+        try {
+            const textToEmbed = `${item.title}: ${item.description || ''} ${item.category || ''} ${item.tags ? item.tags.join(' ') : ''}`;
 
-        // Insert
-        const { data, error } = await supabase.from('venues').insert({
-            ...venue,
-            embedding
-        }).select();
+            const embeddingResult = await model.embedContent(textToEmbed);
+            const embedding = embeddingResult.embedding.values;
 
-        if (error) console.error("Insert Error", error);
-        results.push(data ? data[0] : null);
+            // Update row
+            const { error: updateError } = await supabase
+                .from('map_items')
+                .update({ embedding })
+                .eq('id', item.id);
+
+            if (updateError) console.error(`Update Error for ${item.title}`, updateError);
+            else results.push(item.title);
+
+        } catch (e) {
+            console.error(`Embedding Error for ${item.title}`, e);
+        }
     }
 
-    return new Response(JSON.stringify({ message: "Seeding Complete", seeded: results.length }), {
-        headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Content-Type': 'application/json'
-        }
+    return new Response(JSON.stringify({
+        message: "Smart Embedding Complete",
+        seeded_count: results.length,
+        items: results
+    }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
 }

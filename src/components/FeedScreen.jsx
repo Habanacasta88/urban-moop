@@ -245,12 +245,15 @@ export const FeedScreen = ({ activeTab, onTabChange }) => {
                                                 </div>
                                                 <div className="flex-1 flex flex-col justify-between py-1">
                                                     <div>
-                                                        <h4 className="font-black text-text leading-tight mb-1">{item.name}</h4>
+                                                        <h4 className="font-black text-text leading-tight mb-1">{item.title || item.name}</h4>
                                                         <p className="text-xs text-muted line-clamp-2">{item.description}</p>
                                                     </div>
                                                     <div className="flex items-center gap-2 mt-2">
-                                                        <span className="text-[10px] font-bold bg-brand-50 text-brand-700 px-2 py-0.5 rounded border border-brand-100">
-                                                            {(item.match_score * 100).toFixed(0)}% Match
+                                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${(item.similarity || 0) > 0.7
+                                                                ? 'bg-green-50 text-green-700 border-green-200'
+                                                                : 'bg-brand-50 text-brand-700 border-brand-100'
+                                                            }`}>
+                                                            {((item.similarity || 0) * 100).toFixed(0)}% Match
                                                         </span>
                                                         {item.is_external && (
                                                             <span className="text-[10px] font-bold text-blue-500 flex items-center gap-1">

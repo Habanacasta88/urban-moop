@@ -1,60 +1,42 @@
--- 1. Enable vector extension
+-- 1. Enable vector extension (idempotent)
 create extension if not exists vector;
 
--- 1.1 Create tables if they don't exist (since we are moving from Mock to Real)
-create table if not exists venues (
-  id uuid default gen_random_uuid() primary key,
-  name text not null,
-  description text,
-  category text,
-  vibes text[], -- Array of strings
-  price_level int default 1,
-  location text,
-  lat float,
-  lng float,
-  image_url text,
-  created_at timestamp with time zone default now()
-);
-
--- 2. Add embedding column to venues (768 dimensions for Gemini Pro)
--- Check if column exists first to facilitate re-runs
+-- 2. Add embedding column to EXISTING map_items table
 do $$
 begin
-    if not exists (select 1 from information_schema.columns where table_name = 'venues' and column_name = 'embedding') then
-        alter table venues add column embedding vector(768);
+    if not exists (select 1 from information_schema.columns where table_name = 'map_items' and column_name = 'embedding') then
+        alter table map_items add column embedding vector(768);
     end if;
 end $$;
 
--- 3. Create RPC function for hybrid search
-create or replace function search_venues(
+-- 3. Create or Replace RPC function for hybrid search on map_items
+create or replace function search_map_items(
   query_embedding vector(768),
   match_threshold float,
-  match_count int,
-  filter_vibes text[],
-  filter_price_max int
+  match_count int
 )
 returns table (
   id uuid,
-  name text,
+  title text,
   description text,
-  similarity float,
-  dist_meters float -- Optional: if we want to add geo-distance later
+  category text,
+  image_url text, -- mapped from whatever column holds the image
+  similarity float
 )
 language plpgsql
 as $$
 begin
   return query
   select
-    venues.id,
-    venues.name,
-    venues.description,
-    1 - (venues.embedding <=> query_embedding) as similarity,
-    0.0::float as dist_meters -- Placeholder if geo is not enabled yet
-  from venues
-  where 1 - (venues.embedding <=> query_embedding) > match_threshold
-  and (filter_vibes is null or venues.vibes && filter_vibes) -- Array overlap
-  and (filter_price_max is null or venues.price_level <= filter_price_max)
-  order by venues.embedding <=> query_embedding
+    map_items.id,
+    map_items.title,
+    map_items.description,
+    map_items.category,
+    map_items.image_url,
+    1 - (map_items.embedding <=> query_embedding) as similarity
+  from map_items
+  where 1 - (map_items.embedding <=> query_embedding) > match_threshold
+  order by map_items.embedding <=> query_embedding
   limit match_count;
 end;
 $$;
