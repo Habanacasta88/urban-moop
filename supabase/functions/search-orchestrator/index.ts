@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
         // 4. Internal Search (Supabase RPC)
         const { data: internalResults, error: rpcError } = await supabase.rpc('search_map_items', {
             query_embedding: embedding,
-            match_threshold: 0.6, // More selective threshold
+            match_threshold: 0.3, // Balanced threshold (was 0.1, 0.6 too strict)
             match_count: 10
         })
 
@@ -65,6 +65,9 @@ Deno.serve(async (req) => {
         }
 
         console.log("Internal Search Results:", internalResults?.length || 0);
+        if (internalResults && internalResults.length > 0) {
+            console.log("Sample result:", JSON.stringify(internalResults[0]));
+        }
 
         // 5. Hybrid Logic: Fallback to Web Search if <3 results
         let externalResults = [];

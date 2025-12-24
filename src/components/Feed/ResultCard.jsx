@@ -1,7 +1,21 @@
 import { Globe, MapPin, Clock, Bookmark, Navigation } from 'lucide-react';
 
-export const ResultCard = ({ item, type = 'internal', onSave, onNavigate }) => {
+export const ResultCard = ({ item, type = 'internal', onView, onSave, onNavigate }) => {
     const isExternal = type === 'external' || item.is_external;
+
+    // Handle navigation to Google Maps
+    const handleNavigate = () => {
+        if (item.lat && item.lng) {
+            const url = `https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}`;
+            window.open(url, '_blank');
+        } else if (item.location || item.location_name) {
+            const location = encodeURIComponent(item.location || item.location_name);
+            const url = `https://www.google.com/maps/search/?api=1&query=${location}`;
+            window.open(url, '_blank');
+        }
+
+        if (onNavigate) onNavigate(item);
+    };
 
     return (
         <div className={`mb-3 rounded-2xl border overflow-hidden transition-all ${isExternal
@@ -67,19 +81,19 @@ export const ResultCard = ({ item, type = 'internal', onSave, onNavigate }) => {
                     <div className="flex gap-2">
                         <button
                             className="text-xs px-3 py-1.5 bg-brand-600 text-white rounded-lg font-medium hover:bg-brand-700 transition-colors"
-                            onClick={() => {/* TODO: Open detail */ }}
+                            onClick={() => onView && onView(item)}
                         >
                             Ver
                         </button>
                         <button
                             className="text-xs px-3 py-1.5 bg-surface border border-border rounded-lg font-medium hover:bg-surface-2 transition-colors flex items-center gap-1"
-                            onClick={onSave}
+                            onClick={() => onSave && onSave(item)}
                         >
                             <Bookmark size={12} /> Guardar
                         </button>
                         <button
                             className="text-xs px-3 py-1.5 bg-surface border border-border rounded-lg font-medium hover:bg-surface-2 transition-colors flex items-center gap-1"
-                            onClick={onNavigate}
+                            onClick={handleNavigate}
                         >
                             <Navigation size={12} /> Ir
                         </button>

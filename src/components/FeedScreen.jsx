@@ -7,7 +7,10 @@ import { EventDetailScreen } from './EventDetailScreen';
 import { LiveCard, SocialCard, FlashCard, DiscoverCard } from './Feed/FeedCards';
 import { ResultCard } from './Feed/ResultCard';
 import { getSmartFeed } from '../utils/feedAlgorithm';
-import { SearchService } from '../services/SearchService'; // Added Service
+import { SearchService } from '../services/SearchService';
+import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabaseClient';
+import LoginModal from './LoginModal';
 
 // Hardcoded Mock Data for Feed
 const RAW_FEED_ITEMS = [
@@ -65,12 +68,14 @@ const QuickFilter = ({ label, active, onClick }) => (
 );
 
 export const FeedScreen = ({ activeTab, onTabChange }) => {
+    const { user } = useAuth();
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [activeFilter, setActiveFilter] = useState('Para ti');
+    const [showLoginModal, setShowLoginModal] = useState(false);
 
     // Search State
     const [searchQuery, setSearchQuery] = useState('');
-    const [isSearching, setIsSearching] = useState(false); // UI state
+    const [isSearching, setIsSearching] = useState(false);
     const [searchLoading, setSearchLoading] = useState(false);
     const [searchResults, setSearchResults] = useState(null);
 
@@ -80,15 +85,59 @@ export const FeedScreen = ({ activeTab, onTabChange }) => {
             setSearchLoading(true);
             setSearchResults(null);
             try {
-                // Call Edge Function
                 const response = await SearchService.search(searchQuery);
                 setSearchResults(response);
             } catch (err) {
                 console.error("Search failed", err);
-                // Fallback / Error state
             } finally {
                 setSearchLoading(false);
             }
+        }
+    };
+
+    // VIEW HANDLER - Show detail modal
+    const handleView = (item) => {
+        setSelectedEvent(item);
+    };
+
+    // SAVE HANDLER - Save to favorites with auth check
+    const handleSave = async (item) => {
+        if (!user) {
+            setShowLoginModal(true);
+            return;
+        }
+
+        try {
+            // Check if already saved
+            const { data: existing } = await supabase
+                .from('saved_items')
+                .select('id')
+                .eq('user_id', user.id)
+                .eq('item_id', item.id)
+                .single();
+
+            if (existing) {
+                // Already saved, optionally show message
+                console.log('Already saved');
+                return;
+            }
+
+            // Save to favorites
+            const { error } = await supabase
+                .from('saved_items')
+                .insert({
+                    user_id: user.id,
+                    item_id: item.id,
+                    item_type: item.source === 'web_discovery' ? 'web_place' : 'map_item',
+                    saved_at: new Date().toISOString()
+                });
+
+            if (error) throw error;
+
+            // Show success feedback (you can add a toast here)
+            console.log('Saved successfully');
+        } catch (error) {
+            console.error('Error saving:', error);
         }
     };
 
@@ -231,6 +280,8 @@ export const FeedScreen = ({ activeTab, onTabChange }) => {
                                                 key={item.id || idx}
                                                 item={item}
                                                 type="internal"
+                                                onView={handleView}
+                                                onSave={handleSave}
                                             />
                                         ))}
                                     </div>
@@ -248,6 +299,8 @@ export const FeedScreen = ({ activeTab, onTabChange }) => {
                                                 key={item.id || idx}
                                                 item={item}
                                                 type="external"
+                                                onView={handleView}
+                                                onSave={handleSave}
                                             />
                                         ))}
 
@@ -330,6 +383,11 @@ export const FeedScreen = ({ activeTab, onTabChange }) => {
                     />
                 )}
             </AnimatePresence>
+
+            {/* Login Modal */}
+            {showLoginModal && (
+                <LoginModal onClose={() => setShowLoginModal(false)} />
+            )}
 
         </div>
     );
