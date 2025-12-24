@@ -10,7 +10,7 @@ import { getSmartFeed } from '../utils/feedAlgorithm';
 import { SearchService } from '../services/SearchService';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
-import LoginModal from './LoginModal';
+import { LoginModal } from './LoginModal';
 
 // Hardcoded Mock Data for Feed
 const RAW_FEED_ITEMS = [
