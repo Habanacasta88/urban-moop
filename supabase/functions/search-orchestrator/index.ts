@@ -55,8 +55,8 @@ Deno.serve(async (req) => {
         // 4. Internal Search (Supabase RPC)
         const { data: internalResults, error: rpcError } = await supabase.rpc('search_map_items', {
             query_embedding: embedding,
-            match_threshold: 0.1, // Ultra-low threshold to verify ANY data
-            match_count: 5
+            match_threshold: 0.6, // More selective threshold
+            match_count: 10
         })
 
         if (rpcError) {
@@ -64,22 +64,27 @@ Deno.serve(async (req) => {
             throw new Error(`Database Error: ${rpcError.message}`);
         }
 
-        console.log("Search Results:", internalResults?.length || 0);
+        console.log("Internal Search Results:", internalResults?.length || 0);
 
-        // 5. Fallback Check
-        if (!internalResults || internalResults.length < 1) {
-            return new Response(JSON.stringify({
-                source: 'internal',
-                results: [],
-                message: 'No relevant results found. (External search disabled)'
-            }), {
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            })
+        // 5. Hybrid Logic: Fallback to Web Search if <3 results
+        let externalResults = [];
+
+        if (!internalResults || internalResults.length < 3) {
+            console.log("Triggering web search fallback...");
+            try {
+                externalResults = await performWebSearch(query, genAI, supabase);
+                console.log("Web Search Results:", externalResults.length);
+            } catch (webError) {
+                console.error("Web Search Error:", webError);
+                // Continue with internal results only
+            }
         }
 
+        // 6. Return Mixed Results
         return new Response(JSON.stringify({
-            source: 'internal',
-            results: internalResults
+            internal: internalResults || [],
+            external: externalResults,
+            total: (internalResults?.length || 0) + externalResults.length
         }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
@@ -92,6 +97,118 @@ Deno.serve(async (req) => {
         })
     }
 })
+
+// Web Search with Gemini Search Grounding + Auto-Cache
+async function performWebSearch(query: string, genAI: any, supabase: any) {
+    try {
+        // 1. Use Gemini with Search Grounding
+        const model = genAI.getGenerativeModel({
+            model: "gemini-2.0-flash-exp",
+            tools: [{ googleSearch: {} }]
+        });
+
+        // 2. Structured Prompt
+        const prompt = `Busca lugares reales en Sabadell, España que coincidan con: "${query}".
+
+IMPORTANTE:
+- SOLO lugares que estén en Sabadell
+- Que estén abiertos o sean relevantes HOY
+- Máximo 3 resultados
+- Información verificable y actual
+
+Devuelve un JSON array con este formato exacto:
+[
+  {
+    "title": "Nombre exacto del lugar",
+    "description": "Descripción breve (max 100 caracteres)",
+    "category": "cafe|restaurant|park|culture|bar|shop",
+    "location": "Dirección completa en Sabadell",
+    "tags": ["tag1", "tag2", "tag3"],
+    "hours": "Horario de hoy o 'Consultar horarios'",
+    "lat": 41.5xxx,
+    "lng": 2.1xxx
+  }
+]
+
+Si no encuentras lugares relevantes, devuelve un array vacío: []`;
+
+        const result = await model.generateContent(prompt);
+        const responseText = result.response.text();
+
+        // 3. Parse JSON (handle markdown code blocks)
+        let jsonText = responseText.trim();
+        if (jsonText.startsWith('```json')) {
+            jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+        } else if (jsonText.startsWith('```')) {
+            jsonText = jsonText.replace(/```\n?/g, '');
+        }
+
+        const places = JSON.parse(jsonText);
+
+        if (!Array.isArray(places) || places.length === 0) {
+            return [];
+        }
+
+        // 4. Generate embeddings and prepare for DB
+        const embeddingModel = genAI.getGenerativeModel({ model: 'text-embedding-004' });
+        const enrichedPlaces = [];
+
+        for (const place of places.slice(0, 3)) { // Max 3 results
+            try {
+                // Generate embedding
+                const text = `${place.title}: ${place.description} ${place.tags?.join(' ') || ''}`;
+                const embeddingResult = await embeddingModel.embedContent(text);
+
+                // Prepare DB object
+                const dbPlace = {
+                    title: place.title,
+                    description: place.description,
+                    category: place.category || 'other',
+                    location_name: place.location,
+                    tags: place.tags || [],
+                    hours: place.hours,
+                    lat: place.lat || 41.5475,
+                    lng: place.lng || 2.1088,
+                    embedding: embeddingResult.embedding.values,
+                    source: 'web_discovery',
+                    discovered_at: new Date().toISOString(),
+                    image_url: null // Will be added later if needed
+                };
+
+                // 5. Insert into DB (cache)
+                const { data: inserted, error: insertError } = await supabase
+                    .from('map_items')
+                    .insert(dbPlace)
+                    .select()
+                    .single();
+
+                if (insertError) {
+                    console.error("Cache Insert Error:", insertError);
+                    // Still return the result even if caching fails
+                    enrichedPlaces.push({
+                        ...place,
+                        similarity: 0.85, // High similarity for web results
+                        is_external: true
+                    });
+                } else {
+                    enrichedPlaces.push({
+                        ...inserted,
+                        similarity: 0.85,
+                        is_external: true
+                    });
+                }
+            } catch (placeError) {
+                console.error(`Error processing place ${place.title}:`, placeError);
+            }
+        }
+
+        return enrichedPlaces;
+
+    } catch (error) {
+        console.error("Web Search Error:", error);
+        return [];
+    }
+}
 
 async function handleSeeding(req: Request) {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;

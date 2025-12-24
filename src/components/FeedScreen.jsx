@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import BottomNavigation from './Navigation/BottomNavigation';
 import { EventDetailScreen } from './EventDetailScreen';
 import { LiveCard, SocialCard, FlashCard, DiscoverCard } from './Feed/FeedCards';
+import { ResultCard } from './Feed/ResultCard';
 import { getSmartFeed } from '../utils/feedAlgorithm';
 import { SearchService } from '../services/SearchService'; // Added Service
 
@@ -205,72 +206,94 @@ export const FeedScreen = ({ activeTab, onTabChange }) => {
                             </div>
                         )}
 
+
                         {/* Results */}
                         {!searchLoading && searchResults && (
                             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                {/* Result Header */}
-                                <div className="flex items-center justify-between mb-4 px-1">
-                                    <h3 className="font-bold text-text flex items-center gap-2">
-                                        <Sparkles size={16} className="text-brand-500" />
-                                        Resultados para "{searchQuery}"
-                                    </h3>
-                                    {searchResults.source === 'external' && (
-                                        <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded border border-blue-100 font-bold flex items-center gap-1">
-                                            <Globe size={10} /> Web Search
-                                        </span>
-                                    )}
-                                </div>
-
-                                {searchResults.message && !searchResults.results && (
-                                    <div className="bg-green-50 border border-green-200 rounded-2xl p-4 mb-4 text-center animate-in fade-in zoom-in">
+                                {/* !SEED Message */}
+                                {searchResults.message && (
+                                    <div className="bg-green-50 border border-green-200 rounded-2xl p-4 mb-4 text-center">
                                         <div className="text-3xl mb-2">🌱</div>
                                         <h3 className="font-bold text-green-800">Sistema Actualizado</h3>
                                         <p className="text-sm text-green-700">{searchResults.message}</p>
-                                        <p className="text-xs text-green-600 mt-2">Ahora borra "!SEED" y busca algo normal.</p>
                                     </div>
                                 )}
 
-                                {/* List */}
-                                {searchResults.results && searchResults.results.length > 0 ? (
-                                    searchResults.results.map((item, idx) => (
-                                        <div key={idx} className="mb-4">
-                                            {/* Reuse DiscoverCard style structure but adapted for simple search result */}
-                                            <div className="bg-white rounded-2xl p-3 shadow-lg border border-border flex gap-3 group active:scale-98 transition-transform">
-                                                <div className="w-20 h-24 rounded-xl bg-gray-100 shrink-0 overflow-hidden relative">
-                                                    <img
-                                                        src={item.image_url || `https://source.unsplash.com/random/200x200?${item.category || 'place'}`}
-                                                        alt={item.name}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                </div>
-                                                <div className="flex-1 flex flex-col justify-between py-1">
-                                                    <div>
-                                                        <h4 className="font-black text-text leading-tight mb-1">{item.title || item.name}</h4>
-                                                        <p className="text-xs text-muted line-clamp-2">{item.description}</p>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 mt-2">
-                                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${(item.similarity || 0) > 0.7
-                                                                ? 'bg-green-50 text-green-700 border-green-200'
-                                                                : 'bg-brand-50 text-brand-700 border-brand-100'
-                                                            }`}>
-                                                            {((item.similarity || 0) * 100).toFixed(0)}% Match
-                                                        </span>
-                                                        {item.is_external && (
-                                                            <span className="text-[10px] font-bold text-blue-500 flex items-center gap-1">
-                                                                <Globe size={10} /> Web
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="text-center py-10 p-6 bg-surface rounded-3xl border border-dashed border-border mx-2">
-                                        <p className="text-sm font-medium text-text">No encontramos nada exacto.</p>
-                                        <p className="text-xs text-muted mt-1">Prueba con palabras clave diferentes.</p>
+                                {/* Internal Results Section */}
+                                {searchResults.internal && searchResults.internal.length > 0 && (
+                                    <div className="mb-6">
+                                        <h3 className="text-sm font-bold text-text mb-3 flex items-center gap-2">
+                                            <Sparkles size={16} className="text-brand-600" />
+                                            En UrbanMoop ({searchResults.internal.length})
+                                        </h3>
+                                        {searchResults.internal.map((item, idx) => (
+                                            <ResultCard
+                                                key={item.id || idx}
+                                                item={item}
+                                                type="internal"
+                                            />
+                                        ))}
                                     </div>
                                 )}
+
+                                {/* External Results Section */}
+                                {searchResults.external && searchResults.external.length > 0 && (
+                                    <div className="mb-6">
+                                        <h3 className="text-sm font-bold text-text mb-3 flex items-center gap-2">
+                                            <Globe size={16} className="text-blue-600" />
+                                            Encontramos en la web ({searchResults.external.length})
+                                        </h3>
+                                        {searchResults.external.map((item, idx) => (
+                                            <ResultCard
+                                                key={item.id || idx}
+                                                item={item}
+                                                type="external"
+                                            />
+                                        ))}
+
+                                        {/* Feedback Loop */}
+                                        <div className="mt-4 p-3 bg-blue-50 rounded-xl border border-blue-200">
+                                            <p className="text-xs text-blue-800 mb-2">¿Estos lugares son útiles?</p>
+                                            <div className="flex gap-2">
+                                                <button className="text-xs px-3 py-1 bg-white rounded-lg border hover:bg-gray-50 transition-colors">
+                                                    👍 Sí
+                                                </button>
+                                                <button className="text-xs px-3 py-1 bg-white rounded-lg border hover:bg-gray-50 transition-colors">
+                                                    👎 No
+                                                </button>
+                                                <button className="text-xs px-3 py-1 bg-white rounded-lg border hover:bg-gray-50 transition-colors">
+                                                    📝 Añadir info
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* No Results Fallback */}
+                                {(!searchResults.internal || searchResults.internal.length === 0) &&
+                                    (!searchResults.external || searchResults.external.length === 0) &&
+                                    !searchResults.message && (
+                                        <div className="text-center py-10 px-6">
+                                            <div className="text-4xl mb-3">🔍</div>
+                                            <h3 className="font-bold text-text mb-2">
+                                                No encontramos "{searchQuery}" ahora cerca
+                                            </h3>
+                                            <p className="text-sm text-muted mb-4">
+                                                Pero puedes:
+                                            </p>
+                                            <div className="space-y-2">
+                                                <button className="w-full py-3 bg-surface rounded-xl border hover:bg-surface-2 transition-colors text-sm font-medium">
+                                                    🗺️ Ver lugares similares
+                                                </button>
+                                                <button className="w-full py-3 bg-surface rounded-xl border hover:bg-surface-2 transition-colors text-sm font-medium">
+                                                    ➕ Crear Moop aquí
+                                                </button>
+                                                <button className="w-full py-3 bg-surface rounded-xl border hover:bg-surface-2 transition-colors text-sm font-medium">
+                                                    🔔 Avísame cuando haya algo
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
                             </div>
                         )}
                     </div>
