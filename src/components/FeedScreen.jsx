@@ -86,6 +86,7 @@ export const FeedScreen = ({ activeTab, onTabChange }) => {
             setSearchResults(null);
             try {
                 const response = await SearchService.search(searchQuery);
+                console.log('🔍 Search Response:', JSON.stringify(response, null, 2));
                 setSearchResults(response);
             } catch (err) {
                 console.error("Search failed", err);
