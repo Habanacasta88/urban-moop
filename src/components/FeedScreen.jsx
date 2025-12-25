@@ -398,7 +398,10 @@ return (
 
         {/* Login Modal */}
         {showLoginModal && (
-            <LoginModal onClose={() => setShowLoginModal(false)} />
+            <LoginModal
+                isOpen={showLoginModal}
+                onClose={() => setShowLoginModal(false)}
+            />
         )}
 
     </div>

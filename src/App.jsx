@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react'; // Added useEffect
+import { useState, useEffect } from 'react';
 import { OnboardingScreen } from './components/OnboardingScreen';
 import { LoginModal } from './components/LoginModal';
 import { MapScreen } from './components/MapScreenImproved';
@@ -12,10 +12,11 @@ import { MoopsScreen } from './components/MoopsScreen';
 import { CategoryFeedScreen } from './components/CategoryFeedScreen';
 import { MapOnboardingTooltip } from './components/MapOnboardingTooltip';
 import { ActivityProvider } from './context/ActivityContext';
-import { AuthProvider, useAuth } from './context/AuthContext'; // Import Auth
+import { AuthProvider, useAuth } from './context/AuthContext';
 import ConversationsList from './components/Chat/ConversationsList';
 import ChatWindow from './components/Chat/ChatWindow';
 import { VibeProvider } from './context/VibeContext';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 // Global Components
 import { CreateMoopRadialMenu } from './components/Map/CreateMoopRadialMenu';
 import { CreateMoopWizard } from './components/Moops/CreateMoopWizard';
@@ -23,20 +24,21 @@ import { AnimatePresence, motion } from 'motion/react';
 
 export default function App() {
   return (
-    <AuthProvider>
-      <ActivityProvider>
-        <VibeProvider>
-          <MainApp />
-        </VibeProvider>
-      </ActivityProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <ActivityProvider>
+          <VibeProvider>
+            <MainApp />
+          </VibeProvider>
+        </ActivityProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 
 function MainApp() {
-  const { user, loading: authLoading } = useAuth(); // Use Real Auth
+  const { user, loading: authLoading } = useAuth();
   const [currentScreen, setCurrentScreen] = useState('onboarding');
-  const [selectedEventId, setSelectedEventId] = useState(1);
   const [activeTab, setActiveTab] = useState('map');
   const [selectedCategory, setSelectedCategory] = useState(null);
 
@@ -44,7 +46,6 @@ function MainApp() {
   const [conversationId, setConversationId] = useState(null);
 
   // Login State
-  // const [userStatus, setUserStatus] = useState(null); // Removed mock state
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [loginTrigger, setLoginTrigger] = useState('');
   const [showMapTooltip, setShowMapTooltip] = useState(false);

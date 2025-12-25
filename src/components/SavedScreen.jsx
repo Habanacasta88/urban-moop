@@ -5,6 +5,7 @@ import BottomNavigation from './Navigation/BottomNavigation';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import { LoginModal } from './LoginModal';
+import { LoadingSpinner } from './common/LoadingSpinner';
 
 const FILTERS = [
     { id: 'all', label: 'Todo' },
@@ -164,9 +165,7 @@ export const SavedScreen = ({ activeTab, onTabChange, onItemClick }) => {
                     <h1 className="text-3xl font-black text-brand-700 tracking-tight">Guardados</h1>
                     <p className="text-sm text-muted font-medium mt-1">Cargando...</p>
                 </div>
-                <div className="flex-1 flex items-center justify-center">
-                    <div className="w-12 h-12 rounded-full border-4 border-brand-100 border-t-brand-600 animate-spin"></div>
-                </div>
+                <LoadingSpinner message="Cargando guardados..." />
                 <BottomNavigation currentView={activeTab} onNavigate={onTabChange} />
             </div>
         );

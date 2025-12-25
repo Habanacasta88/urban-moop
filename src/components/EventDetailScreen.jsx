@@ -21,7 +21,10 @@ export const EventDetailScreen = ({ event, onBack, onSave }) => {
         <div className="fixed inset-0 z-50 bg-gray-950 overflow-y-auto animate-in slide-in-from-bottom duration-300">
             {/* Header / Image */}
             <div className="relative h-[45vh] w-full">
-                <ImageWithFallback src={event.imageUrl} className="w-full h-full object-cover" />
+                <ImageWithFallback
+                    src={event.image_url || event.imageUrl}
+                    className="w-full h-full object-cover"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/20 to-transparent"></div>
 
                 {/* Navbar */}
