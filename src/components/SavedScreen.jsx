@@ -36,7 +36,7 @@ export const SavedScreen = ({ activeTab, onTabChange, onItemClick }) => {
                     .from('saved_items')
                     .select(`
                         *,
-                        map_items (
+                        map_items!inner (
                             id,
                             title,
                             description,
@@ -55,7 +55,7 @@ export const SavedScreen = ({ activeTab, onTabChange, onItemClick }) => {
                 if (error) throw error;
 
                 // Transform data to match UI expectations
-                const transformedItems = data.map(item => ({
+                const transformedItems = (data || []).map(item => ({
                     id: item.id,
                     itemId: item.item_id,
                     type: item.item_type || item.map_items?.category || 'event',
@@ -219,8 +219,8 @@ export const SavedScreen = ({ activeTab, onTabChange, onItemClick }) => {
                             key={filter.id}
                             onClick={() => setActiveFilter(filter.id)}
                             className={`px-5 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all border ${activeFilter === filter.id
-                                    ? 'bg-brand-600 text-white border-brand-600 shadow-lg shadow-brand-500/30'
-                                    : 'bg-surface text-text-2 border-border hover:bg-surface-2'
+                                ? 'bg-brand-600 text-white border-brand-600 shadow-lg shadow-brand-500/30'
+                                : 'bg-surface text-text-2 border-border hover:bg-surface-2'
                                 }`}
                         >
                             {filter.label}

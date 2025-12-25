@@ -4,6 +4,9 @@ import { ImageWithFallback } from './figma/ImageWithFallback';
 import { motion } from 'motion/react';
 
 export const EventDetailScreen = ({ event, onBack, onSave }) => {
+    // Check event exists FIRST before using hooks
+    if (!event) return null;
+
     const { openVibeCheck } = useVibe();
 
     // Mock Similar Events
@@ -13,7 +16,6 @@ export const EventDetailScreen = ({ event, onBack, onSave }) => {
         { id: 'sim-3', title: 'Jazz & Wine', image: 'https://images.unsplash.com/photo-1514525253440-b393452e3383?w=200' },
     ];
 
-    if (!event) return null;
 
     return (
         <div className="fixed inset-0 z-50 bg-gray-950 overflow-y-auto animate-in slide-in-from-bottom duration-300">
