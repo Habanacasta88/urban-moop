@@ -101,16 +101,10 @@ Deno.serve(async (req) => {
     }
 })
 
-// Web Search with Gemini Search Grounding + Auto-Cache
+// Web Search with Gemini - with fallback for Search Grounding
 async function performWebSearch(query: string, genAI: any, supabase: any) {
     try {
-        // 1. Use Gemini 1.5 Pro with Search Grounding (stable, high quota)
-        const model = genAI.getGenerativeModel({
-            model: "gemini-1.5-pro",
-            tools: [{ googleSearch: {} }]
-        });
-
-        // 2. Parse temporal context from query
+        // 1. Parse temporal context from query
         const today = new Date();
         const dayNames = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
         const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
@@ -128,7 +122,6 @@ async function performWebSearch(query: string, genAI: any, supabase: any) {
             temporalContext = `mañana (${formatDate(tomorrow)})`;
             searchTimeframe = 'mañana';
         } else if (queryLower.includes('fin de semana') || queryLower.includes('finde')) {
-            // Find next Saturday
             const saturday = new Date(today);
             saturday.setDate(saturday.getDate() + (6 - saturday.getDay()));
             const sunday = new Date(saturday);
@@ -147,40 +140,43 @@ async function performWebSearch(query: string, genAI: any, supabase: any) {
 
         console.log("Temporal Context:", temporalContext);
 
-        // 3. Enhanced Prompt with temporal context
-        const prompt = `Busca lugares y eventos reales en Sabadell, España que coincidan con: "${query}".
+        // 2. Create prompt for Gemini (works without Search Grounding)
+        const prompt = `Eres un experto local de Sabadell, España. Basándote en tu conocimiento de lugares reales y populares de Sabadell, sugiere lugares que coincidan con: "${query}".
 
-CONTEXTO TEMPORAL: ${temporalContext}
-FECHA ACTUAL: ${today.toISOString().split('T')[0]}
+CONTEXTO: ${temporalContext}
 
-IMPORTANTE:
-- SOLO lugares/eventos que estén en Sabadell o muy cerca
-- Que estén disponibles/abiertos ${searchTimeframe}
-- Máximo 3 resultados
-- Información verificable y actual de la web
-- Si la búsqueda menciona "niños", "familias", prioriza actividades familiares
+REQUISITOS:
+- SOLO lugares reales que existan en Sabadell
+- Que sean relevantes para ${searchTimeframe}
+- Máximo 3 sugerencias
+- Prioriza lugares populares y bien valorados
+${queryLower.includes('niño') || queryLower.includes('familia') ? '- Enfócate en actividades familiares y para niños' : ''}
 
-Devuelve un JSON array con este formato exacto:
+RESPONDE SOLO con un JSON array (sin explicaciones):
 [
   {
-    "title": "Nombre exacto del lugar o evento",
-    "description": "Descripción breve (max 100 caracteres)",
+    "title": "Nombre del lugar",
+    "description": "Descripción breve (50 caracteres max)",
     "category": "cafe|restaurant|park|culture|bar|shop|event|kids|sport",
-    "location": "Dirección completa en Sabadell",
-    "tags": ["tag1", "tag2", "tag3"],
-    "hours": "Horario específico para ${searchTimeframe} o 'Consultar'",
-    "date": "Fecha del evento si aplica (YYYY-MM-DD) o null",
-    "lat": 41.5xxx,
-    "lng": 2.1xxx
+    "location": "Dirección en Sabadell",
+    "tags": ["tag1", "tag2"],
+    "hours": "Horario aproximado",
+    "lat": 41.54,
+    "lng": 2.10
   }
 ]
 
-Si no encuentras lugares relevantes, devuelve un array vacío: []`;
+Si no conoces lugares relevantes en Sabadell, devuelve: []`;
 
+        // 3. Try with gemini-1.5-flash (fast and reliable)
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+        console.log("Calling Gemini for local suggestions...");
         const result = await model.generateContent(prompt);
         const responseText = result.response.text();
+        console.log("Gemini response received");
 
-        // 3. Parse JSON (handle markdown code blocks)
+        // 4. Parse JSON response
         let jsonText = responseText.trim();
         if (jsonText.startsWith('```json')) {
             jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
@@ -191,20 +187,21 @@ Si no encuentras lugares relevantes, devuelve un array vacío: []`;
         const places = JSON.parse(jsonText);
 
         if (!Array.isArray(places) || places.length === 0) {
+            console.log("No places returned from Gemini");
             return [];
         }
 
-        // 4. Generate embeddings and prepare for DB
+        console.log(`Gemini returned ${places.length} places`);
+
+        // 5. Generate embeddings and cache in DB
         const embeddingModel = genAI.getGenerativeModel({ model: 'text-embedding-004' });
         const enrichedPlaces = [];
 
-        for (const place of places.slice(0, 3)) { // Max 3 results
+        for (const place of places.slice(0, 3)) {
             try {
-                // Generate embedding
                 const text = `${place.title}: ${place.description} ${place.tags?.join(' ') || ''}`;
                 const embeddingResult = await embeddingModel.embedContent(text);
 
-                // Prepare DB object
                 const dbPlace = {
                     title: place.title,
                     description: place.description,
@@ -215,12 +212,11 @@ Si no encuentras lugares relevantes, devuelve un array vacío: []`;
                     lat: place.lat || 41.5475,
                     lng: place.lng || 2.1088,
                     embedding: embeddingResult.embedding.values,
-                    source: 'web_discovery',
+                    source: 'ai_suggestion',
                     discovered_at: new Date().toISOString(),
-                    image_url: null // Will be added later if needed
+                    image_url: null
                 };
 
-                // 5. Insert into DB (cache)
                 const { data: inserted, error: insertError } = await supabase
                     .from('map_items')
                     .insert(dbPlace)
@@ -228,11 +224,10 @@ Si no encuentras lugares relevantes, devuelve un array vacío: []`;
                     .single();
 
                 if (insertError) {
-                    console.error("Cache Insert Error:", insertError);
-                    // Still return the result even if caching fails
+                    console.error("Cache Insert Error:", insertError.message);
                     enrichedPlaces.push({
                         ...place,
-                        similarity: 0.85, // High similarity for web results
+                        similarity: 0.85,
                         is_external: true
                     });
                 } else {
@@ -243,7 +238,7 @@ Si no encuentras lugares relevantes, devuelve un array vacío: []`;
                     });
                 }
             } catch (placeError) {
-                console.error(`Error processing place ${place.title}:`, placeError);
+                console.error(`Error processing ${place.title}:`, placeError);
             }
         }
 
