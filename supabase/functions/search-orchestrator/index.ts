@@ -69,16 +69,26 @@ Deno.serve(async (req) => {
             console.log("Sample result:", JSON.stringify(internalResults[0]));
         }
 
-        // 5. Hybrid Logic: Fallback to Web Search if <3 results
+        // 5. Hybrid Logic: Fallback to AI suggestions if:
+        //    - Less than 3 results, OR
+        //    - Average similarity is low (< 0.5) meaning poor quality matches
         let externalResults = [];
 
-        if (!internalResults || internalResults.length < 3) {
-            console.log("Triggering web search fallback...");
+        const avgSimilarity = internalResults && internalResults.length > 0
+            ? internalResults.reduce((sum: number, r: any) => sum + (r.similarity || 0), 0) / internalResults.length
+            : 0;
+
+        console.log("Average Similarity:", avgSimilarity.toFixed(2));
+
+        const shouldFallback = !internalResults || internalResults.length < 3 || avgSimilarity < 0.5;
+
+        if (shouldFallback) {
+            console.log("Triggering AI suggestions fallback...");
             try {
                 externalResults = await performWebSearch(query, genAI, supabase);
-                console.log("Web Search Results:", externalResults.length);
+                console.log("AI Suggestion Results:", externalResults.length);
             } catch (webError) {
-                console.error("Web Search Error:", webError);
+                console.error("AI Suggestion Error:", webError);
                 // Continue with internal results only
             }
         }
