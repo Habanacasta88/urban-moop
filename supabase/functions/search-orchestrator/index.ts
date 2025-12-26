@@ -104,9 +104,9 @@ Deno.serve(async (req) => {
 // Web Search with Gemini Search Grounding + Auto-Cache
 async function performWebSearch(query: string, genAI: any, supabase: any) {
     try {
-        // 1. Use Gemini with Search Grounding (stable model with better quota)
+        // 1. Use Gemini 2.0 Flash with Search Grounding (production model)
         const model = genAI.getGenerativeModel({
-            model: "gemini-1.5-flash",
+            model: "gemini-2.0-flash",
             tools: [{ googleSearch: {} }]
         });
 
