@@ -110,24 +110,66 @@ async function performWebSearch(query: string, genAI: any, supabase: any) {
             tools: [{ googleSearch: {} }]
         });
 
-        // 2. Structured Prompt
-        const prompt = `Busca lugares reales en Sabadell, España que coincidan con: "${query}".
+        // 2. Parse temporal context from query
+        const today = new Date();
+        const dayNames = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+        const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+
+        const formatDate = (d: Date) => `${dayNames[d.getDay()]} ${d.getDate()} de ${monthNames[d.getMonth()]}`;
+
+        let temporalContext = `hoy (${formatDate(today)})`;
+        let searchTimeframe = 'hoy';
+
+        const queryLower = query.toLowerCase();
+
+        if (queryLower.includes('mañana')) {
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            temporalContext = `mañana (${formatDate(tomorrow)})`;
+            searchTimeframe = 'mañana';
+        } else if (queryLower.includes('fin de semana') || queryLower.includes('finde')) {
+            // Find next Saturday
+            const saturday = new Date(today);
+            saturday.setDate(saturday.getDate() + (6 - saturday.getDay()));
+            const sunday = new Date(saturday);
+            sunday.setDate(sunday.getDate() + 1);
+            temporalContext = `este fin de semana (${formatDate(saturday)} y ${formatDate(sunday)})`;
+            searchTimeframe = 'este fin de semana';
+        } else if (queryLower.includes('esta semana') || queryLower.includes('próximos días')) {
+            const endWeek = new Date(today);
+            endWeek.setDate(endWeek.getDate() + 7);
+            temporalContext = `esta semana (del ${formatDate(today)} al ${formatDate(endWeek)})`;
+            searchTimeframe = 'los próximos 7 días';
+        } else if (queryLower.includes('este mes')) {
+            temporalContext = `este mes (${monthNames[today.getMonth()]} ${today.getFullYear()})`;
+            searchTimeframe = 'este mes';
+        }
+
+        console.log("Temporal Context:", temporalContext);
+
+        // 3. Enhanced Prompt with temporal context
+        const prompt = `Busca lugares y eventos reales en Sabadell, España que coincidan con: "${query}".
+
+CONTEXTO TEMPORAL: ${temporalContext}
+FECHA ACTUAL: ${today.toISOString().split('T')[0]}
 
 IMPORTANTE:
-- SOLO lugares que estén en Sabadell
-- Que estén abiertos o sean relevantes HOY
+- SOLO lugares/eventos que estén en Sabadell o muy cerca
+- Que estén disponibles/abiertos ${searchTimeframe}
 - Máximo 3 resultados
-- Información verificable y actual
+- Información verificable y actual de la web
+- Si la búsqueda menciona "niños", "familias", prioriza actividades familiares
 
 Devuelve un JSON array con este formato exacto:
 [
   {
-    "title": "Nombre exacto del lugar",
+    "title": "Nombre exacto del lugar o evento",
     "description": "Descripción breve (max 100 caracteres)",
-    "category": "cafe|restaurant|park|culture|bar|shop",
+    "category": "cafe|restaurant|park|culture|bar|shop|event|kids|sport",
     "location": "Dirección completa en Sabadell",
     "tags": ["tag1", "tag2", "tag3"],
-    "hours": "Horario de hoy o 'Consultar horarios'",
+    "hours": "Horario específico para ${searchTimeframe} o 'Consultar'",
+    "date": "Fecha del evento si aplica (YYYY-MM-DD) o null",
     "lat": 41.5xxx,
     "lng": 2.1xxx
   }
