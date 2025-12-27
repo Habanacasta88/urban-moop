@@ -4,7 +4,7 @@ import { Filter, Flame, MapPin, Zap, Music, Coffee, Search, Globe, Sparkles } fr
 import { motion, AnimatePresence } from 'motion/react';
 import BottomNavigation from './Navigation/BottomNavigation';
 import { EventDetailScreen } from './EventDetailScreen';
-import { LiveCard, SocialCard, FlashCard, DiscoverCard } from './Feed/FeedCards';
+import { LiveCard, SocialCard, FlashCard, DiscoverCard, EventCard, RouteCard } from './Feed/FeedCards';
 import { ResultCard } from './Feed/ResultCard';
 import { getSmartFeed } from '../utils/feedAlgorithm';
 import { SearchService } from '../services/SearchService';
@@ -12,29 +12,29 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import { LoginModal } from './LoginModal';
 
-// Hardcoded Mock Data for Feed
+// Hardcoded Mock Data for Feed (Enhanced with new card types)
 const RAW_FEED_ITEMS = [
     {
         id: '1',
         type: 'live',
-        title: 'Jazz Night & Cocktails',
-        place: 'Blue Note Club',
+        title: 'Terraza activa con DJ',
+        place: 'La Terraza del Mar',
+        description: 'Sesión sunset con el mejor ambiente del barrio',
         distance: '0.4 km',
-        attendees: 12,
-        image_url: 'https://images.unsplash.com/photo-1514525253440-b393452de23e?q=80&w=1000',
-        vibes: ['chill', 'music'],
+        attendees: 18,
+        imageUrl: 'https://images.unsplash.com/photo-1514525253440-b393452de23e?q=80&w=1000',
+        vibes: ['chill', 'social'],
         startTime: new Date().toISOString(),
         endTime: new Date(Date.now() + 7200000).toISOString()
     },
     {
         id: '2',
         type: 'moop',
+        mode: 'social', // 🟢 Modo social
         user: { name: 'Carla', avatar: 'https://i.pravatar.cc/150?u=carla' },
-        action: 'va a',
-        target: 'Mercat Central',
-        time: 'hace 5 min',
-        comment: '¡Alguien para unos pinchos? 🍢',
-        place_image: 'https://images.unsplash.com/photo-1533900298318-6b8da08a523e?q=80&w=1000'
+        target: 'Vermut en Mercat Central',
+        title: 'Vermut en Mercat Central',
+        time: 'hace 5 min'
     },
     {
         id: '3',
@@ -43,14 +43,55 @@ const RAW_FEED_ITEMS = [
         place: 'La Terraza',
         timeLeft: '45m',
         distance: '0.2 km',
-        image_url: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=1000'
+        imageUrl: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=1000'
     },
     {
         id: '4',
+        type: 'moop',
+        mode: 'activity', // 🟡 Modo actividad
+        user: { name: 'Marc', avatar: 'https://i.pravatar.cc/150?u=marc' },
+        target: 'Padel en Club Tennis',
+        title: 'Padel en Club Tennis',
+        time: 'hace 15 min'
+    },
+    {
+        id: '5',
+        type: 'event',
+        title: 'Concierto indie en Sala Esferic',
+        category: 'music',
+        distance: '800m',
+        time: 'Hoy 22:00',
+        imageUrl: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?q=80&w=1000',
+        saves: 47,
+        interested: 89,
+        lat: 41.5488,
+        lng: 2.1093
+    },
+    {
+        id: '6',
+        type: 'route',
+        title: 'Ruta del Vermut ☀️',
+        imageUrl: 'https://images.unsplash.com/photo-1529543544277-750e0b95bff6?q=80&w=1000',
+        stops: 4,
+        duration: '2h',
+        distance: '1.8 km',
+        author: 'sabadell_local'
+    },
+    {
+        id: '7',
+        type: 'moop',
+        mode: 'ghost', // 🔴 Modo fantasma
+        user: { name: 'Anónimo', avatar: 'https://i.pravatar.cc/150?u=ghost' },
+        target: 'Café tranquilo',
+        title: 'Café tranquilo para trabajar',
+        time: 'hace 30 min'
+    },
+    {
+        id: '8',
         type: 'new',
         title: 'Nuevo: "El Taller"',
-        description: 'Tapas creativas en el centro.',
-        image_url: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1000',
+        description: 'Tapas creativas en el centro con terraza.',
+        imageUrl: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1000',
         rating: 4.8
     }
 ];
@@ -164,16 +205,23 @@ export const FeedScreen = ({ activeTab, onTabChange }) => {
         return items;
     }, [activeFilter, RAW_FEED_ITEMS]);
 
-    // RENDER FACTORY
+    // RENDER FACTORY - Enhanced with new card types
     const renderCard = (item) => {
         switch (item.type) {
-            case 'live': return <LiveCard key={item.id} item={item} onClick={() => setSelectedEvent(item)} />;
-            case 'moop': return <SocialCard key={item.id} item={item} onClick={() => setSelectedEvent(item)} />;
-            case 'flash': return <FlashCard key={item.id} item={item} onClick={() => setSelectedEvent(item)} />;
-            case 'new':
+            case 'live':
+                return <LiveCard key={item.id} item={item} onClick={() => setSelectedEvent(item)} />;
+            case 'moop':
+                return <SocialCard key={item.id} item={item} onClick={() => setSelectedEvent(item)} />;
+            case 'flash':
+                return <FlashCard key={item.id} item={item} onClick={() => setSelectedEvent(item)} />;
             case 'event':
+                return <EventCard key={item.id} item={item} onClick={() => setSelectedEvent(item)} />;
+            case 'route':
+                return <RouteCard key={item.id} item={item} onClick={() => setSelectedEvent(item)} />;
+            case 'new':
                 return <DiscoverCard key={item.id} item={item} onClick={() => setSelectedEvent(item)} />;
-            default: return null;
+            default:
+                return null;
         }
     };
 
