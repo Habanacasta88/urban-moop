@@ -22,7 +22,7 @@ const RAW_FEED_ITEMS = [
         description: 'Sesión sunset con el mejor ambiente del barrio',
         distance: '0.4 km',
         attendees: 18,
-        imageUrl: 'https://images.unsplash.com/photo-1514525253440-b393452de23e?q=80&w=1000',
+        imageUrl: 'https://source.unsplash.com/800x600/?rooftop,bar,terrace',
         vibes: ['chill', 'social'],
         startTime: new Date().toISOString(),
         endTime: new Date(Date.now() + 7200000).toISOString()
@@ -43,7 +43,7 @@ const RAW_FEED_ITEMS = [
         place: 'La Terraza',
         timeLeft: '45m',
         distance: '0.2 km',
-        imageUrl: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=1000'
+        imageUrl: 'https://source.unsplash.com/400x400/?cocktail,mojito'
     },
     {
         id: '4',
@@ -61,7 +61,7 @@ const RAW_FEED_ITEMS = [
         category: 'music',
         distance: '800m',
         time: 'Hoy 22:00',
-        imageUrl: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?q=80&w=1000',
+        imageUrl: 'https://source.unsplash.com/800x450/?concert,music,live',
         saves: 47,
         interested: 89,
         lat: 41.5488,
@@ -71,7 +71,7 @@ const RAW_FEED_ITEMS = [
         id: '6',
         type: 'route',
         title: 'Ruta del Vermut ☀️',
-        imageUrl: 'https://images.unsplash.com/photo-1529543544277-750e0b95bff6?q=80&w=1000',
+        imageUrl: 'https://source.unsplash.com/800x400/?wine,tapas,spain',
         stops: 4,
         duration: '2h',
         distance: '1.8 km',
@@ -91,7 +91,7 @@ const RAW_FEED_ITEMS = [
         type: 'new',
         title: 'Nuevo: "El Taller"',
         description: 'Tapas creativas en el centro con terraza.',
-        imageUrl: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1000',
+        imageUrl: 'https://source.unsplash.com/800x450/?tapas,restaurant,food',
         rating: 4.8
     }
 ];
