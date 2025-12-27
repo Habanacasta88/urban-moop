@@ -147,22 +147,8 @@ const MapEventCard = ({ event, distance, onClose }) => {
                     <p className="text-gray-600 text-sm leading-relaxed">{event.description}</p>
                 </div>
 
-                {/* Secondary CTA: Vibe Check */}
-                <div
-                    onClick={handleRateClick}
-                    className="bg-white border border-gray-100 shadow-sm rounded-xl p-4 flex items-center justify-between cursor-pointer active:scale-95 transition-transform mb-24"
-                >
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-yellow-50 flex items-center justify-center text-yellow-600">
-                            <Zap size={20} fill="currentColor" />
-                        </div>
-                        <div>
-                            <p className="text-sm font-bold text-gray-900">¿Cómo está el ambiente?</p>
-                            <p className="text-[11px] text-gray-500">Tu opinión ayuda en tiempo real</p>
-                        </div>
-                    </div>
-                    <ChevronRight size={18} className="text-gray-300" />
-                </div>
+                {/* Removed: Valorar ambiente - Users can only rate after participating */}
+                <div className="mb-24" />
 
             </div>
 
@@ -210,17 +196,17 @@ const MapEventCard = ({ event, distance, onClose }) => {
                             </div>
                             <div className="flex gap-3">
                                 <button
-                                    onClick={handleRateClick}
+                                    onClick={handleSocialClick}
                                     className="flex-1 bg-white text-black text-xs font-bold py-3 rounded-lg flex items-center justify-center gap-1.5 active:scale-95 transition-transform"
                                 >
-                                    <Zap size={14} fill="currentColor" className="text-yellow-500" />
-                                    Valorar ambiente
+                                    <Users size={14} className="text-indigo-600" />
+                                    Ver quién va
                                 </button>
                                 <button
-                                    onClick={handleSocialClick}
+                                    onClick={dismissOverlay}
                                     className="flex-1 bg-gray-800 text-white text-xs font-bold py-3 rounded-lg active:scale-95 transition-transform"
                                 >
-                                    Ver quién va
+                                    Cerrar
                                 </button>
                             </div>
                         </div>
