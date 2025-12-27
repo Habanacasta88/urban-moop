@@ -12,76 +12,59 @@ const corsHeaders = {
 }
 
 // ============================================
-// CONFIGURACIÓN DE CATEGORÍAS Y FILTROS
+// CONFIGURACIÓN DE INFERENCIA
 // ============================================
 
-const CATEGORY_CONFIG = {
-    fiesta: {
-        keywords: ['fiesta', 'discoteca', 'club', 'concierto', 'música en vivo', 'dj', 'noche', 'copas', 'bailar'],
-        geminiContext: 'locales de ocio nocturno, discotecas, bares con música, conciertos, eventos de fiesta',
-        vibes: ['energético', 'social', 'nocturno'],
-        timePreference: 'noche'
-    },
-    gastronomia: {
-        keywords: ['restaurante', 'comida', 'cena', 'almuerzo', 'brunch', 'tapas', 'vermut', 'café', 'desayuno', 'sushi', 'pizza', 'burger'],
-        geminiContext: 'restaurantes, bares de tapas, cafeterías, sitios para comer, brunch, vermut',
-        vibes: ['gastronómico', 'social', 'relax'],
-        timePreference: 'flexible'
-    },
-    deporte: {
-        keywords: ['deporte', 'gimnasio', 'running', 'yoga', 'padel', 'futbol', 'piscina', 'senderismo', 'bici'],
-        geminiContext: 'instalaciones deportivas, gimnasios, rutas de running, parques para deporte, actividades fitness',
-        vibes: ['activo', 'saludable', 'energético'],
-        timePreference: 'mañana'
-    },
-    cultura: {
-        keywords: ['museo', 'exposición', 'teatro', 'cine', 'biblioteca', 'galería', 'arte', 'historia', 'arquitectura'],
-        geminiContext: 'museos, teatros, exposiciones, galerías de arte, espacios culturales, monumentos',
-        vibes: ['cultural', 'tranquilo', 'educativo'],
-        timePreference: 'tarde'
-    },
-    familia: {
-        keywords: ['niños', 'familia', 'parque infantil', 'actividades familiares', 'zoo', 'acuario', 'taller infantil', 'niño'],
-        geminiContext: 'parques infantiles, actividades para niños, planes familiares, espacios kid-friendly',
-        vibes: ['familiar', 'divertido', 'seguro'],
-        timePreference: 'mañana-tarde'
-    },
-    relax: {
-        keywords: ['tranquilo', 'relax', 'spa', 'terraza', 'paseo', 'lectura', 'café tranquilo', 'naturaleza'],
-        geminiContext: 'cafés tranquilos, terrazas relajadas, parques, espacios para desconectar, spas',
-        vibes: ['tranquilo', 'chill', 'relax'],
-        timePreference: 'flexible'
-    },
-    social: {
-        keywords: ['quedada', 'conocer gente', 'networking', 'afterwork', 'vermut', 'terraza', 'buen ambiente'],
-        geminiContext: 'bares con buen ambiente, terrazas sociales, espacios para conocer gente, afterwork',
-        vibes: ['social', 'animado', 'buen rollo'],
-        timePreference: 'tarde-noche'
-    }
+const CATEGORY_KEYWORDS = {
+    gastronomia: ['restaurante', 'comida', 'cena', 'almuerzo', 'brunch', 'tapas', 'vermut', 'café', 'desayuno', 'sushi', 'pizza', 'burger', 'comer'],
+    fiesta: ['fiesta', 'discoteca', 'club', 'concierto', 'música', 'dj', 'noche', 'copas', 'bailar'],
+    deporte: ['deporte', 'gimnasio', 'running', 'yoga', 'padel', 'futbol', 'piscina', 'senderismo', 'bici'],
+    cultura: ['museo', 'exposición', 'teatro', 'cine', 'biblioteca', 'galería', 'arte', 'historia'],
+    familia: ['niños', 'familia', 'parque infantil', 'niño', 'actividades familiares'],
+    relax: ['tranquilo', 'relax', 'spa', 'terraza', 'paseo', 'naturaleza']
 };
 
-const TIME_CONFIG = {
-    hoy: {
-        label: 'hoy',
-        searchWindow: 'las próximas horas de hoy',
-        urgency: 'inmediato'
-    },
-    manana: {
-        label: 'mañana',
-        searchWindow: 'mañana durante todo el día',
-        urgency: 'planificado'
-    },
-    semana: {
-        label: 'esta semana',
-        searchWindow: 'los próximos 7 días',
-        urgency: 'flexible'
-    },
-    finde: {
-        label: 'este fin de semana',
-        searchWindow: 'este sábado y domingo',
-        urgency: 'planificado'
+function inferCategory(query: string): string {
+    const q = query.toLowerCase();
+    for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
+        if (keywords.some(kw => q.includes(kw))) {
+            return category;
+        }
     }
-};
+    return 'general';
+}
+
+function inferTemporal(query: string): { context: string, timeframe: string } {
+    const q = query.toLowerCase();
+    const today = new Date();
+    const dayNames = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+    const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const formatDate = (d: Date) => `${dayNames[d.getDay()]} ${d.getDate()} de ${monthNames[d.getMonth()]}`;
+
+    if (q.includes('mañana')) {
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        return { context: `mañana ${formatDate(tomorrow)}`, timeframe: 'mañana' };
+    }
+    if (q.includes('fin de semana') || q.includes('finde')) {
+        const saturday = new Date(today);
+        saturday.setDate(saturday.getDate() + (6 - saturday.getDay()));
+        const sunday = new Date(saturday);
+        sunday.setDate(sunday.getDate() + 1);
+        return { context: `fin de semana: ${formatDate(saturday)} y ${formatDate(sunday)}`, timeframe: 'este fin de semana' };
+    }
+    if (q.includes('semana') || q.includes('próximos días')) {
+        return { context: `esta semana desde ${formatDate(today)}`, timeframe: 'los próximos 7 días' };
+    }
+
+    const currentHour = today.getHours();
+    let partOfDay = 'hoy';
+    if (currentHour < 12) partOfDay = 'hoy por la mañana';
+    else if (currentHour < 18) partOfDay = 'hoy por la tarde';
+    else partOfDay = 'hoy por la noche';
+
+    return { context: `${partOfDay} (${formatDate(today)}, ${currentHour}:00h)`, timeframe: 'hoy' };
+}
 
 // ============================================
 // GEOCODING CON NOMINATIM
@@ -99,13 +82,14 @@ async function geocodeAddress(placeName: string, address: string): Promise<{ lat
         const data = await response.json();
 
         if (data && data.length > 0) {
+            console.log(`Geocoded "${placeName}": ${data[0].lat}, ${data[0].lon}`);
             return {
                 lat: parseFloat(data[0].lat),
                 lng: parseFloat(data[0].lon)
             };
         }
 
-        // Fallback: buscar solo el nombre en Sabadell
+        // Fallback
         const fallbackUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(placeName + ', Sabadell, Spain')}&format=json&limit=1`;
         const fallbackResponse = await fetch(fallbackUrl, {
             headers: { 'User-Agent': 'UrbanMoop/1.0' }
@@ -119,119 +103,12 @@ async function geocodeAddress(placeName: string, address: string): Promise<{ lat
             };
         }
 
-        return { lat: 41.5463, lng: 2.1086 }; // Centro de Sabadell
+        return { lat: 41.5463, lng: 2.1086 };
 
     } catch (error) {
         console.error(`Geocoding error:`, error);
         return { lat: 41.5463, lng: 2.1086 };
     }
-}
-
-// ============================================
-// GENERADOR DE PROMPTS INTELIGENTE
-// ============================================
-
-function buildSmartPrompt(filters: SearchFilters): string {
-    const today = new Date();
-    const dayNames = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-    const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-
-    const currentHour = today.getHours();
-    const formatDate = (d: Date) => `${dayNames[d.getDay()]} ${d.getDate()} de ${monthNames[d.getMonth()]}`;
-
-    // Determinar contexto temporal
-    const timeConfig = TIME_CONFIG[filters.when] || TIME_CONFIG.hoy;
-    let temporalContext = '';
-
-    if (filters.when === 'hoy') {
-        if (currentHour < 12) {
-            temporalContext = `hoy ${formatDate(today)} por la MAÑANA (ahora son las ${currentHour}:00)`;
-        } else if (currentHour < 18) {
-            temporalContext = `hoy ${formatDate(today)} por la TARDE (ahora son las ${currentHour}:00)`;
-        } else {
-            temporalContext = `hoy ${formatDate(today)} por la NOCHE (ahora son las ${currentHour}:00)`;
-        }
-    } else if (filters.when === 'manana') {
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        temporalContext = `mañana ${formatDate(tomorrow)}`;
-    } else if (filters.when === 'finde') {
-        const saturday = new Date(today);
-        saturday.setDate(saturday.getDate() + (6 - saturday.getDay()));
-        const sunday = new Date(saturday);
-        sunday.setDate(sunday.getDate() + 1);
-        temporalContext = `este fin de semana: ${formatDate(saturday)} y ${formatDate(sunday)}`;
-    } else {
-        temporalContext = `esta semana (desde ${formatDate(today)})`;
-    }
-
-    // Obtener configuración de categoría
-    const categoryConfig = CATEGORY_CONFIG[filters.category] || CATEGORY_CONFIG.social;
-
-    // Construir prompt optimizado
-    const prompt = `Eres un experto local de Sabadell, España. Tu misión es recomendar lugares y actividades REALES que existan.
-
-📅 CONTEXTO TEMPORAL: ${temporalContext}
-🎯 CATEGORÍA: ${filters.category?.toUpperCase() || 'GENERAL'}
-🔍 BUSCANDO: ${categoryConfig.geminiContext}
-
-${filters.freeText ? `💬 NOTA ADICIONAL DEL USUARIO: "${filters.freeText}"` : ''}
-
-INSTRUCCIONES CRÍTICAS:
-1. SOLO lugares que EXISTAN REALMENTE en Sabadell
-2. Que estén ABIERTOS o tengan actividad en ${timeConfig.searchWindow}
-3. Prioriza lugares POPULARES y bien valorados
-4. Incluye la dirección REAL y completa
-5. Si es un EVENTO, incluye fecha y hora específica
-
-${filters.when === 'hoy' && currentHour >= 18 ? '⚠️ ES DE NOCHE: Prioriza lugares abiertos en horario nocturno' : ''}
-${filters.category === 'fiesta' ? '⚠️ FIESTA: Incluye horario de cierre y si hay eventos especiales' : ''}
-${filters.category === 'familia' ? '⚠️ FAMILIA: Verifica que sea apto para niños' : ''}
-
-RESPONDE ÚNICAMENTE con este JSON (sin texto adicional):
-[
-  {
-    "title": "Nombre OFICIAL del lugar",
-    "description": "Qué lo hace especial para ${filters.category || 'planes'} (máx 80 chars)",
-    "category": "${mapCategoryToDb(filters.category)}",
-    "location": "Calle Real 123, 08201 Sabadell",
-    "tags": ["tag1", "tag2", "tag3"],
-    "hours": "Horario relevante para ${timeConfig.label}",
-    "vibe": "${categoryConfig.vibes[0]}",
-    "price_level": "€|€€|€€€",
-    "best_for": "${timeConfig.label}"
-  }
-]
-
-MÁXIMO 5 resultados. Si no conoces lugares reales, devuelve: []`;
-
-    return prompt;
-}
-
-function mapCategoryToDb(category: string): string {
-    const mapping: Record<string, string> = {
-        'fiesta': 'bar',
-        'gastronomia': 'restaurant',
-        'deporte': 'sport',
-        'cultura': 'culture',
-        'familia': 'kids',
-        'relax': 'cafe',
-        'social': 'bar'
-    };
-    return mapping[category] || 'other';
-}
-
-// ============================================
-// INTERFACES
-// ============================================
-
-interface SearchFilters {
-    when: 'hoy' | 'manana' | 'semana' | 'finde';
-    category: 'fiesta' | 'gastronomia' | 'deporte' | 'cultura' | 'familia' | 'relax' | 'social';
-    orderBy: 'relevance' | 'distance';
-    freeText?: string;
-    userLat?: number;
-    userLng?: number;
 }
 
 // ============================================
@@ -244,22 +121,8 @@ Deno.serve(async (req) => {
     }
 
     try {
-        const body = await req.json();
-
-        // Soportar tanto query simple como filtros estructurados
-        const query = body.query;
-        const filters: SearchFilters = body.filters || {
-            when: 'hoy',
-            category: 'social',
-            orderBy: 'relevance'
-        };
-
-        // Si viene query libre, intentar inferir categoría
-        if (query && !body.filters) {
-            filters.freeText = query;
-            filters.category = inferCategory(query);
-            filters.when = inferTemporal(query);
-        }
+        const { query } = await req.json()
+        if (!query) throw new Error('Query is required')
 
         if (query === '!SEED') {
             return await handleSeeding(req);
@@ -276,19 +139,22 @@ Deno.serve(async (req) => {
         const supabase = createClient(supabaseUrl, supabaseKey)
         const genAI = new GoogleGenerativeAI(geminiKey)
 
-        // Generar embedding para búsqueda en DB
-        const searchText = filters.freeText || `${filters.category} ${filters.when}`;
+        // Inferir categoría y temporalidad
+        const category = inferCategory(query);
+        const temporal = inferTemporal(query);
+        console.log(`Query: "${query}" -> Category: ${category}, Temporal: ${temporal.timeframe}`);
+
+        // Generate Embedding
         const modelEmbedding = genAI.getGenerativeModel({ model: "text-embedding-004" });
-        const resultEmbedding = await modelEmbedding.embedContent(searchText);
+        const resultEmbedding = await modelEmbedding.embedContent(query);
         const embedding = resultEmbedding.embedding.values;
 
-        // Búsqueda en DB con filtros
-        const categoryFilter = mapCategoryToDb(filters.category);
+        // Internal Search
         const { data: internalResults, error: rpcError } = await supabase.rpc('search_map_items', {
             query_embedding: embedding,
             match_threshold: 0.25,
             match_count: 15
-        });
+        })
 
         if (rpcError) {
             console.error("RPC Error:", rpcError);
@@ -297,81 +163,101 @@ Deno.serve(async (req) => {
 
         console.log("Internal Search Results:", internalResults?.length || 0);
 
-        // Filtrar por categoría si hay resultados
-        let filteredResults = internalResults || [];
-        if (categoryFilter && filteredResults.length > 0) {
-            const categoryMatches = filteredResults.filter((r: any) => r.category === categoryFilter);
-            if (categoryMatches.length >= 2) {
-                filteredResults = categoryMatches;
-            }
-        }
-
-        // Calcular si necesitamos fallback a IA
-        const avgSimilarity = filteredResults.length > 0
-            ? filteredResults.reduce((sum: number, r: any) => sum + (r.similarity || 0), 0) / filteredResults.length
+        // Fallback to AI suggestions if few or low quality results
+        let externalResults = [];
+        const avgSimilarity = internalResults?.length > 0
+            ? internalResults.reduce((sum: number, r: any) => sum + (r.similarity || 0), 0) / internalResults.length
             : 0;
 
         console.log("Average Similarity:", avgSimilarity.toFixed(2));
 
-        let externalResults = [];
-        const shouldFallback = filteredResults.length < 3 || avgSimilarity < 0.4;
+        const shouldFallback = !internalResults || internalResults.length < 3 || avgSimilarity < 0.4;
 
         if (shouldFallback) {
-            console.log(`Fallback to AI: ${filteredResults.length} results, avg similarity: ${avgSimilarity.toFixed(2)}`);
+            console.log("Triggering AI fallback...");
             try {
-                externalResults = await performSmartSearch(filters, genAI, supabase);
-                console.log("AI Suggestion Results:", externalResults.length);
+                externalResults = await performAISuggestions(query, category, temporal, genAI, supabase);
+                console.log("AI Results:", externalResults.length);
             } catch (e) {
-                console.error("AI Search Error:", e);
+                console.error("AI Suggestion Error:", e);
             }
         }
 
-        // Ordenar resultados
-        let allResults = [...filteredResults, ...externalResults];
-
-        if (filters.orderBy === 'distance' && filters.userLat && filters.userLng) {
-            allResults = allResults.sort((a: any, b: any) => {
-                const distA = calculateDistance(filters.userLat!, filters.userLng!, a.lat, a.lng);
-                const distB = calculateDistance(filters.userLat!, filters.userLng!, b.lat, b.lng);
-                return distA - distB;
-            });
-        }
-
         return new Response(JSON.stringify({
-            internal: filteredResults.slice(0, 10),
+            internal: internalResults || [],
             external: externalResults,
-            total: allResults.length,
-            filters_applied: filters,
+            total: (internalResults?.length || 0) + externalResults.length,
             meta: {
+                category_detected: category,
+                temporal_context: temporal.timeframe,
                 avg_similarity: avgSimilarity.toFixed(2),
                 used_ai_fallback: shouldFallback
             }
         }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+        })
 
     } catch (error) {
         console.error("Error:", error);
         return new Response(JSON.stringify({ error: (error as Error).message }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 400,
-        });
+        })
     }
-});
+})
 
 // ============================================
-// BÚSQUEDA INTELIGENTE CON GEMINI
+// AI SUGGESTIONS
 // ============================================
 
-async function performSmartSearch(filters: SearchFilters, genAI: any, supabase: any) {
+async function performAISuggestions(query: string, category: string, temporal: { context: string, timeframe: string }, genAI: any, supabase: any) {
     try {
-        const prompt = buildSmartPrompt(filters);
+        const categoryContextMap: Record<string, string> = {
+            gastronomia: 'restaurantes, bares de tapas, cafeterías, sitios para comer',
+            fiesta: 'bares con música, discotecas, locales nocturnos, sitios para salir',
+            deporte: 'gimnasios, instalaciones deportivas, parques para hacer deporte',
+            cultura: 'museos, teatros, exposiciones, espacios culturales',
+            familia: 'parques infantiles, actividades para niños, planes familiares',
+            relax: 'cafés tranquilos, terrazas, espacios para desconectar',
+            general: 'lugares interesantes y populares'
+        };
 
+        const categoryContext = categoryContextMap[category] || categoryContextMap.general;
+
+        const prompt = `Eres un experto local de Sabadell, España. Sugiere 3 lugares REALES que existan para: "${query}".
+
+📅 CONTEXTO TEMPORAL: ${temporal.context}
+🎯 CATEGORÍA DETECTADA: ${category.toUpperCase()}
+🔍 BUSCANDO: ${categoryContext}
+
+INSTRUCCIONES CRÍTICAS:
+1. SOLO lugares que EXISTAN REALMENTE en Sabadell
+2. Que estén ABIERTOS o disponibles ${temporal.timeframe}
+3. Incluye la dirección REAL y completa
+4. El nombre debe ser el nombre OFICIAL del establecimiento
+${category === 'familia' ? '5. Verifica que sea APTO PARA NIÑOS' : ''}
+${category === 'fiesta' && temporal.timeframe === 'hoy' ? '5. Solo lugares abiertos de NOCHE' : ''}
+
+RESPONDE ÚNICAMENTE con JSON válido (sin explicaciones):
+[
+  {
+    "title": "Nombre OFICIAL del lugar",
+    "description": "Descripción breve (máx 60 chars)",
+    "category": "cafe|restaurant|park|culture|bar|shop|event|kids|sport",
+    "location": "Calle Real 123, Sabadell",
+    "tags": ["tag1", "tag2"]
+  }
+]
+
+Si no conoces lugares reales en Sabadell, devuelve: []`;
+
+        // Usar gemini-1.5-flash (más estable que 2.0-flash)
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-        console.log("Calling Gemini with smart prompt...");
+        console.log("Calling Gemini 1.5 Flash...");
         const result = await model.generateContent(prompt);
         const responseText = result.response.text();
+        console.log("Gemini response preview:", responseText.substring(0, 200));
 
         // Parse JSON
         let jsonText = responseText.trim();
@@ -379,36 +265,33 @@ async function performSmartSearch(filters: SearchFilters, genAI: any, supabase: 
 
         const jsonMatch = jsonText.match(/\[[\s\S]*\]/);
         if (!jsonMatch) {
-            console.log("No JSON found in response");
+            console.log("No JSON array found");
             return [];
         }
 
         const places = JSON.parse(jsonMatch[0]);
         if (!Array.isArray(places) || places.length === 0) return [];
 
-        console.log(`Gemini returned ${places.length} places for ${filters.category}/${filters.when}`);
+        console.log(`Gemini returned ${places.length} suggestions`);
 
-        // Geocodificar y guardar
+        // Geocode y guardar
         const embeddingModel = genAI.getGenerativeModel({ model: 'text-embedding-004' });
         const enrichedPlaces = [];
 
-        for (const place of places.slice(0, 5)) {
+        for (const place of places.slice(0, 3)) {
             try {
-                // Geocodificar
                 const coords = await geocodeAddress(place.title, place.location || '');
-                await new Promise(resolve => setTimeout(resolve, 1100)); // Rate limit Nominatim
+                await new Promise(resolve => setTimeout(resolve, 1100)); // Rate limit
 
-                // Generar embedding
                 const text = `${place.title}: ${place.description} ${place.tags?.join(' ') || ''}`;
                 const embeddingResult = await embeddingModel.embedContent(text);
 
                 const dbPlace = {
                     title: place.title,
                     description: place.description,
-                    category: place.category || mapCategoryToDb(filters.category),
+                    category: place.category || 'other',
                     location_name: place.location,
                     tags: place.tags || [],
-                    hours: place.hours,
                     lat: coords.lat,
                     lng: coords.lng,
                     embedding: embeddingResult.embedding.values,
@@ -425,8 +308,7 @@ async function performSmartSearch(filters: SearchFilters, genAI: any, supabase: 
                     .single();
 
                 if (existing) {
-                    // Actualizar coords si necesario
-                    if (coords.lat !== 41.5463 && existing.lat === 41.5463) {
+                    if (existing.lat === 41.5463 && coords.lat !== 41.5463) {
                         await supabase
                             .from('map_items')
                             .update({ lat: coords.lat, lng: coords.lng })
@@ -451,17 +333,21 @@ async function performSmartSearch(filters: SearchFilters, genAI: any, supabase: 
                     .single();
 
                 if (error) {
-                    console.error("Insert error:", error.message);
+                    console.error(`Insert error:`, error.message);
+                    enrichedPlaces.push({
+                        ...place,
+                        lat: coords.lat,
+                        lng: coords.lng,
+                        similarity: 0.85,
+                        is_external: true
+                    });
+                } else {
+                    enrichedPlaces.push({
+                        ...inserted,
+                        similarity: 0.85,
+                        is_external: true
+                    });
                 }
-
-                enrichedPlaces.push({
-                    ...(inserted || place),
-                    lat: coords.lat,
-                    lng: coords.lng,
-                    similarity: 0.85,
-                    is_external: true
-                });
-
             } catch (e) {
                 console.error(`Error processing ${place.title}:`, e);
             }
@@ -469,46 +355,9 @@ async function performSmartSearch(filters: SearchFilters, genAI: any, supabase: 
 
         return enrichedPlaces;
     } catch (error) {
-        console.error("Smart Search Error:", error);
+        console.error("AI Suggestions Error:", error);
         return [];
     }
-}
-
-// ============================================
-// FUNCIONES AUXILIARES
-// ============================================
-
-function inferCategory(query: string): SearchFilters['category'] {
-    const q = query.toLowerCase();
-
-    for (const [category, config] of Object.entries(CATEGORY_CONFIG)) {
-        if (config.keywords.some(kw => q.includes(kw))) {
-            return category as SearchFilters['category'];
-        }
-    }
-
-    return 'social'; // Default
-}
-
-function inferTemporal(query: string): SearchFilters['when'] {
-    const q = query.toLowerCase();
-
-    if (q.includes('mañana')) return 'manana';
-    if (q.includes('fin de semana') || q.includes('finde')) return 'finde';
-    if (q.includes('semana') || q.includes('próximos días')) return 'semana';
-
-    return 'hoy';
-}
-
-function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
-    const R = 6371; // km
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLng = (lng2 - lng1) * Math.PI / 180;
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLng / 2) * Math.sin(dLng / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
 }
 
 // ============================================
