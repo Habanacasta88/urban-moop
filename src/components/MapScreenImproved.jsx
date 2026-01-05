@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { MapPin, Navigation, List, Map as MapIcon, Layers, Zap, Search, Bookmark, Users, Clock, Flame, Star, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { MapPin, Navigation, Menu, Map as MapIcon, Layers, Zap, Search, Bookmark, Users, Clock, Flame, Star, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import EmotionalMap from './Map/EmotionalMap';
 import BottomNavigation from './Navigation/BottomNavigation';
@@ -14,17 +14,36 @@ import { FilterModal } from './Map/FilterModal';
 export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboardingHint, onCloseHint }) => {
     const { events: fetchedEvents, loading } = useSupabaseMapItems();
     const { openVibeCheck } = useVibe();
-    const [activeFilter, setActiveFilter] = useState('live'); // todo, flash, moop, nuevo, trending
     const [viewMode, setViewMode] = useState('map'); // map, list
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
-    const [filters, setFilters] = useState({ time: 'any', categories: [], sort: 'recommended' });
+    // Filter State
+    // activeFilter (Intent): 'live' (Para ti), 'moop', 'flash', 'culture' (Mapped via modal)
+    const [activeIntent, setActiveIntent] = useState('live');
+    const [filters, setFilters] = useState({
+        time: 'Hoy', // DEFAULT: HOY
+        categories: [],
+        sort: 'recommended'
+    });
+
+    // Handle updates from Intent Menu
+    const handleIntentApply = (newConfig) => {
+        // newConfig contains categories, sort, activeFilter
+        setFilters(prev => ({
+            ...prev,
+            categories: newConfig.categories,
+            sort: newConfig.sort
+        }));
+        if (newConfig.activeFilter) {
+            setActiveIntent(newConfig.activeFilter);
+        }
+    };
 
     // Filter Logic
     const filteredEvents = fetchedEvents.filter(evt => {
-        // 1. Text Search (Legacy)
+        // 1. Text Search
         if (searchQuery) {
             const query = searchQuery.toLowerCase();
             const matchesText =
@@ -35,27 +54,21 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
             if (!matchesText) return false;
         }
 
-        // 2. Quick Filters (Top Bar)
-        if (activeFilter !== 'todo') {
-            if (activeFilter === 'live') {
-                // Priority to explicit isLive flag from DB or Mock
-                if (evt.isLive) return true;
-
-                // Fallback: Date check if isLive is missing/false but times are set
-                const now = new Date();
-                if (!evt.start_time || !evt.end_time) return false;
-                const start = new Date(evt.start_time);
-                const end = new Date(evt.end_time);
-                if (now < start || now > end) return false;
+        // 2. Intent Filtering (activeIntent)
+        if (activeIntent !== 'todo') { // 'todo' is generous fallback
+            if (activeIntent === 'live') {
+                // "Para ti" / Smart Radar: 
+                // Currently simplified to showing everything relevant, or high quality matches
+                // For MVP, if it triggers 'live' we might just show high relevance or time-based
+                // Let's assume 'live' behaves like standard view unless refined
             }
-            if (activeFilter === 'moop' && evt.type !== 'moop') return false;
+            if (activeIntent === 'moop' && evt.type !== 'moop') return false;
+            if (activeIntent === 'flash' && !evt.isFlash) return false;
+            // Culture Intent often maps to specific categories, handled below in 3.
         }
 
-        // 3. Modal Filters - Categories
+        // 3. Category Filtering (From Intent Menu Config)
         if (filters.categories.length > 0) {
-            // Map generic categories to specific DB types if needed, or just match against evt.type/category
-            // Assuming evt.category or evt.type matches the IDs 'party', 'food', 'sport', 'culture' roughly
-            // For MVP: Simple include check if evt.category is one of them OR evt.tags has it
             const catMatch = filters.categories.some(c =>
                 evt.category?.toLowerCase().includes(c) ||
                 evt.type?.toLowerCase().includes(c) ||
@@ -64,25 +77,34 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
             if (!catMatch) return false;
         }
 
-        // 4. Modal Filters - Time
+        // 4. Time Filtering (From Top Bar)
         if (filters.time !== 'any') {
-            const evtDate = new Date(evt.rawStartTime || evt.time); // Assuming rawStartTime is ISO
+            const evtDate = new Date(evt.rawStartTime || evt.time || evt.start_time);
+            // Mock Date handling if raw not avail
+            // If invalid date, we might show it if it's generic, but let's try strict
+
             const now = new Date();
             const today = new Date();
             const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
 
+            // Comparison Helper (ignores time for day match)
+            const isSameDay = (d1, d2) =>
+                d1.getDate() === d2.getDate() &&
+                d1.getMonth() === d2.getMonth() &&
+                d1.getFullYear() === d2.getFullYear();
+
             if (filters.time === 'Hoy') {
-                if (evtDate.getDate() !== today.getDate()) return false;
+                if (!isSameDay(evtDate, today)) return false;
             }
             if (filters.time === 'Mañana') {
-                if (evtDate.getDate() !== tomorrow.getDate()) return false;
+                if (!isSameDay(evtDate, tomorrow)) return false;
             }
             if (filters.time === 'Esta semana') {
                 const endOfWeek = new Date(today); endOfWeek.setDate(today.getDate() + 7);
                 if (evtDate > endOfWeek || evtDate < today) return false;
             }
             if (filters.time === 'Finde') {
-                // Simplified: Friday/Saturday/Sunday
+                // Friday (5), Saturday (6), Sunday (0)
                 const day = evtDate.getDay();
                 if (day !== 5 && day !== 6 && day !== 0) return false;
             }
@@ -91,21 +113,10 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
         return true;
     }).sort((a, b) => {
         // 5. Sorting
-        if (filters.sort === 'distance') return 0;
-
-        // Recommended (Default): Priority -> Moop > Live > Flash > Others
+        if (filters.sort === 'distance') return 0; // Handled by simple map proximity usually or we add logic
+        // Recommended Default
         if (a.type === 'moop' && b.type !== 'moop') return -1;
         if (a.type !== 'moop' && b.type === 'moop') return 1;
-
-        // Check for 'live' (mocked logic based on time or badges)
-        const isALive = a.startTime && new Date(a.startTime) <= new Date() && new Date(a.endTime) >= new Date();
-        const isBLive = b.startTime && new Date(b.startTime) <= new Date() && new Date(b.endTime) >= new Date();
-        if (isALive && !isBLive) return -1;
-        if (!isALive && isBLive) return 1;
-
-        if (a.isFlash && !b.isFlash) return -1;
-        if (!a.isFlash && b.isFlash) return 1;
-
         return 0;
     });
 
@@ -115,7 +126,7 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
 
     useEffect(() => {
         setCarouselIndex(0);
-    }, [activeFilter, filteredEvents.length]);
+    }, [activeIntent, filters.time, filteredEvents.length]);
 
     const handleNext = () => setCarouselIndex((prev) => (prev + 1) % filteredEvents.length);
     const handlePrev = () => setCarouselIndex((prev) => (prev - 1 + filteredEvents.length) % filteredEvents.length);
@@ -129,8 +140,6 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
         }
     };
 
-    // Intercept 'publish' action to show Radial Menu
-    // NOW DELEGATED TO APP.JSX GLOBAL HANDLER
     const handleNavigation = (tabId) => {
         onTabChange(tabId);
     };
@@ -139,12 +148,11 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
         return <div className="flex items-center justify-center h-screen bg-gray-100 text-gray-500">Cargando mapa...</div>;
     }
 
-    // Hardcoded User Location (Sabadell Center - Plaça Sant Roc) for MVP
     const USER_LOCATION = { lat: 41.54329, lng: 2.10942 };
 
     const calculateDistance = (lat1, lon1, lat2, lon2) => {
         if (!lat1 || !lon1 || !lat2 || !lon2) return null;
-        const R = 6371; // km
+        const R = 6371;
         const dLat = (lat2 - lat1) * Math.PI / 180;
         const dLon = (lon2 - lon1) * Math.PI / 180;
         const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
@@ -158,12 +166,10 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
 
     const getEventDistance = (evt) => {
         if (!evt) return null;
-        // Check if event has lat/lng directly
         if (evt.lat && evt.lng) {
             return calculateDistance(USER_LOCATION.lat, USER_LOCATION.lng, evt.lat, evt.lng);
         }
-        // Fallback or todo: geocode address
-        return null; // "350 m"; // Default fallback if needed for demo
+        return null;
     };
 
 
@@ -172,9 +178,9 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
 
             {/* 1. Header & Filters (Z-Index 50) */}
             <div className="absolute top-0 left-0 right-0 z-50 p-4">
-                <RadarHeader activeFilter={activeFilter} onFilterChange={setActiveFilter} events={fetchedEvents} />
+                <RadarHeader />
 
-                {/* Search Bar */}
+                {/* Search Bar & Menu Trigger */}
                 <div className="pointer-events-auto flex gap-3 mt-3">
                     <div className="relative flex-1 group">
                         <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted"><Search size={22} /></div>
@@ -189,50 +195,37 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
                             <button onClick={() => setSearchQuery('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted"><X size={16} /></button>
                         )}
                     </div>
-                    {/* Filters Toggle */}
+                    {/* MENU Toggle (Hamburger) */}
                     <button
                         onClick={() => setIsFilterModalOpen(true)}
-                        className="w-12 bg-surface rounded-2xl shadow-xl shadow-brand-500/5 border border-border flex items-center justify-center text-muted active:scale-95 transition-transform"
+                        className="w-12 bg-white rounded-2xl shadow-xl shadow-brand-500/5 border border-border flex items-center justify-center text-gray-900 active:scale-95 transition-transform"
                     >
-                        <List size={22} />
+                        <Menu size={24} strokeWidth={2.5} />
                     </button>
                 </div>
 
-                {/* Filters Horizontal Scroll */}
+                {/* VISIBLE TIME FILTERS */}
                 <div className="flex items-center gap-2 overflow-x-auto pb-2 mt-3 pointer-events-auto no-scrollbar scroll-pl-4">
-                    <div className="flex items-center gap-2">
-                        {/* "Ahora" (Live) - DEFAULT & FIRST */}
-                        <button
-                            onClick={() => setActiveFilter('live')}
-                            className={`px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition-all flex items-center gap-1.5 ${activeFilter === 'live' ? 'bg-brand-600 text-white scale-105' : 'bg-surface text-text border border-border text-brand-600'}`}
-                        >
-                            🔥 Ahora
-                        </button>
+                    {['Hoy', 'Mañana', 'Este finde', 'Esta semana'].map((timeLabel) => {
+                        // Normalize key for state match ('Este finde' -> 'Finde' maybe? user asked for 'Este finde')
+                        // Let's map display label to internal state key for simplicity or use label as key
+                        const stateKey = timeLabel === 'Este finde' ? 'Finde' : timeLabel;
+                        const isActive = filters.time === stateKey;
 
-                        {/* "Moops" */}
-                        <button
-                            onClick={() => setActiveFilter('moop')}
-                            className={`px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition-all flex items-center gap-1.5 ${activeFilter === 'moop' ? 'bg-brand-600 text-white scale-105' : 'bg-surface text-text border border-border text-brand-400'}`}
-                        >
-                            👥 Moops
-                        </button>
-
-                        {/* "Todo" - Moved to 3rd */}
-                        <button
-                            onClick={() => setActiveFilter('todo')}
-                            className={`px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition-all flex items-center gap-1.5 ${activeFilter === 'todo' ? 'bg-brand-600 text-white scale-105' : 'bg-surface text-text border border-border'}`}
-                        >
-                            🌍 Todo
-                        </button>
-
-                        {/* "Más" (Trigger Modal) */}
-                        <button
-                            onClick={() => setIsFilterModalOpen(true)}
-                            className="px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition-all bg-surface text-muted border border-border flex items-center gap-1 active:scale-95"
-                        >
-                            Más...
-                        </button>
-                    </div>
+                        return (
+                            <button
+                                key={stateKey}
+                                onClick={() => setFilters(prev => ({ ...prev, time: stateKey }))}
+                                className={`px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition-all flex items-center gap-1.5 ${isActive
+                                        ? 'bg-brand-600 text-white scale-105 shadow-brand-500/20'
+                                        : 'bg-surface text-text border border-border text-gray-500 hover:bg-gray-50'
+                                    }`}
+                            >
+                                {timeLabel === 'Hoy' && '🔥 '}
+                                {timeLabel}
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 
@@ -243,7 +236,6 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
                     selectedId={currentSwipeEvent?.id}
                     onSelect={handleMapSelect}
                 />
-                {/* Initial Blur Overlay */}
                 <motion.div
                     initial={{ backdropFilter: 'blur(6px)', backgroundColor: 'rgba(255,255,255,0.1)' }}
                     animate={{ backdropFilter: 'blur(0px)', backgroundColor: 'rgba(255,255,255,0)' }}
@@ -277,17 +269,17 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
                 )}
             </AnimatePresence>
 
-            {/* 7. Filter Modal */}
+            {/* 7. Intent Menu (Filter Modal) */}
             <AnimatePresence>
                 <FilterModal
                     isOpen={isFilterModalOpen}
                     onClose={() => setIsFilterModalOpen(false)}
                     currentFilters={filters}
-                    onApply={setFilters}
+                    onApply={handleIntentApply}
                 />
             </AnimatePresence>
 
-            {/* Onboarding Hint (Cards) */}
+            {/* Onboarding Hint */}
             <AnimatePresence>
                 {showOnboardingHint && (
                     <motion.div
@@ -302,14 +294,11 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
                             <p className="text-xs text-gray-600 font-normal">
                                 Toca un plan y sal ahí fuera.
                             </p>
-                            {/* Down Arrow */}
                             <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white/90 rotate-45 border-r border-b border-white/50"></div>
                         </div>
                     </motion.div>
                 )}
             </AnimatePresence>
-
-
 
             {/* Bottom Nav */}
             <BottomNavigation currentView={activeTab} onNavigate={handleNavigation} />
