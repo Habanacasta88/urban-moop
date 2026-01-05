@@ -4,7 +4,7 @@ import { Filter, Flame, MapPin, Zap, Music, Coffee, Search, Globe, Sparkles } fr
 import { motion, AnimatePresence } from 'motion/react';
 import BottomNavigation from './Navigation/BottomNavigation';
 import { EventDetailScreen } from './EventDetailScreen';
-import { LiveCard, SocialCard, FlashCard, DiscoverCard, EventCard, RouteCard } from './Feed/FeedCards';
+import { LiveCard, FlashCard, EventCard, RouteCard } from './Feed/FeedCards';
 import { ResultCard } from './Feed/ResultCard';
 import { getSmartFeed } from '../utils/feedAlgorithm';
 import { SearchService } from '../services/SearchService';
@@ -211,7 +211,7 @@ export const FeedScreen = ({ activeTab, onTabChange }) => {
             case 'live':
                 return <LiveCard key={item.id} item={item} onClick={() => setSelectedEvent(item)} />;
             case 'moop':
-                return <SocialCard key={item.id} item={item} onClick={() => setSelectedEvent(item)} />;
+                return <LiveCard key={item.id} item={item} onClick={() => setSelectedEvent(item)} />;
             case 'flash':
                 return <FlashCard key={item.id} item={item} onClick={() => setSelectedEvent(item)} />;
             case 'event':
@@ -219,7 +219,7 @@ export const FeedScreen = ({ activeTab, onTabChange }) => {
             case 'route':
                 return <RouteCard key={item.id} item={item} onClick={() => setSelectedEvent(item)} />;
             case 'new':
-                return <DiscoverCard key={item.id} item={item} onClick={() => setSelectedEvent(item)} />;
+                return <EventCard key={item.id} item={item} onClick={() => setSelectedEvent(item)} />;
             default:
                 return null;
         }
