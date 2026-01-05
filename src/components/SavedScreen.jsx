@@ -3,13 +3,15 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Search, MapPin, Share2, Trash2, Heart, ArrowRight, LogIn, Calendar, Clock, ChevronDown, ChevronUp, Map as MapIcon, Zap } from 'lucide-react';
 import BottomNavigation from './Navigation/BottomNavigation';
 import { useAuth } from '../context/AuthContext';
-import { supabase } from '../lib/supabaseClient';
+import { useActivity } from '../context/ActivityContext';
 import { LoginModal } from './LoginModal';
 import { LoadingSpinner } from './common/LoadingSpinner';
 
 export const SavedScreen = ({ activeTab, onTabChange, onItemClick }) => {
     const { user } = useAuth();
-    const [savedItems, setSavedItems] = useState([]);
+    const { savedItems, toggleSaveItem } = useActivity();
+
+    // UI State
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [showLoginModal, setShowLoginModal] = useState(false);
@@ -23,66 +25,13 @@ export const SavedScreen = ({ activeTab, onTabChange, onItemClick }) => {
         past: []
     });
 
-    // Fetch saved items from Supabase
+    // Simulate loading and group items
     useEffect(() => {
-        if (!user) {
+        if (savedItems) {
             setLoading(false);
-            setSavedItems([]);
-            return;
+            categorizeItems(savedItems);
         }
-
-        const fetchSavedItems = async () => {
-            try {
-                setLoading(true);
-                // Attempt to fetch start_time if it exists in map_items, 
-                // otherwise we rely on what we get.
-                const { data, error } = await supabase
-                    .from('saved_items')
-                    .select(`
-                        *,
-                        map_items!inner (
-                            *
-                        )
-                    `)
-                    .eq('user_id', user.id)
-                    .order('saved_at', { ascending: false });
-
-                if (error) throw error;
-
-                // Transform data
-                const items = (data || []).map(item => {
-                    const mapItem = item.map_items;
-                    // Try to find a date field. Adjust 'start_time' key if your DB uses different naming (e.g. starts_at)
-                    // If map_items doesn't have it, we check if it was saved with metadata (unlikely for current schema)
-                    // For now, assume mapItem has start_time or we fallback to 'spaces' if null.
-
-                    return {
-                        id: item.id,
-                        itemId: item.item_id,
-                        type: item.item_type || mapItem.category || 'event',
-                        title: mapItem.title || 'Sin título',
-                        subtitle: mapItem.description || '',
-                        image: mapItem.image_url || 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=400',
-                        distance: mapItem.location_name || 'Ubicación',
-                        date: mapItem.start_time || mapItem.created_at, // Fallback to created_at if start_time missing, but logic below handles it
-                        startTime: mapItem.start_time ? new Date(mapItem.start_time) : null,
-                        category: mapItem.category,
-                        mapItem: mapItem
-                    };
-                });
-
-                setSavedItems(items);
-                categorizeItems(items);
-
-            } catch (error) {
-                console.error('Error fetching saved items:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchSavedItems();
-    }, [user]);
+    }, [savedItems]);
 
     // Categorize Logic
     const categorizeItems = (items) => {
@@ -97,9 +46,10 @@ export const SavedScreen = ({ activeTab, onTabChange, onItemClick }) => {
         };
 
         items.forEach(item => {
+            // For mock data, we expect item.startTime
+            // If fetching from Supabase in the future, ensure it's mapped to startTime
             if (!item.startTime) {
-                // If no specific start time, treat as "Space" / "Place" unless specifically an event without date
-                // For MVP, items without valid start_time go to Spaces
+                // If no specific start time, treat as "Space" / "Place"
                 groups.spaces.push(item);
                 return;
             }
@@ -116,37 +66,21 @@ export const SavedScreen = ({ activeTab, onTabChange, onItemClick }) => {
             }
         });
 
-        // Debug fallback: If everything ends up in Spaces because DB lacks start_time, 
-        // randomly distribute for demo if specifically requested, but better to show real state.
-        // For now, we trust the DB or fallback to spaces.
-
         setGroupedItems(groups);
     };
 
-    // Filter Logic (Search only for simplicity in this view)
+    // Filter Logic
     const filterGroup = (group) => {
         if (!searchQuery) return group;
         return group.filter(item =>
             item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.subtitle.toLowerCase().includes(searchQuery.toLowerCase())
+            (item.subtitle && item.subtitle.toLowerCase().includes(searchQuery.toLowerCase()))
         );
     };
 
-    const handleDelete = async (savedItemId) => {
-        try {
-            const { error } = await supabase
-                .from('saved_items')
-                .delete()
-                .eq('id', savedItemId);
-
-            if (error) throw error;
-
-            const newItems = savedItems.filter(item => item.id !== savedItemId);
-            setSavedItems(newItems);
-            categorizeItems(newItems);
-        } catch (error) {
-            console.error('Error deleting saved item:', error);
-        }
+    const handleDelete = (item) => {
+        // useActivity toggleSaveItem removes it if it exists
+        toggleSaveItem(item);
     };
 
     const handleShare = async (item) => {
@@ -219,9 +153,16 @@ export const SavedScreen = ({ activeTab, onTabChange, onItemClick }) => {
                         </p>
                     </div>
                     {/* Search Trigger */}
-                    <button className="w-10 h-10 rounded-full bg-surface border border-border flex items-center justify-center text-muted">
-                        <Search size={20} />
-                    </button>
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="Buscar..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-32 py-2 px-3 bg-surface rounded-full border border-border text-sm focus:w-40 transition-all focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+                        />
+                        <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
+                    </div>
                 </div>
             </div>
 
@@ -265,12 +206,12 @@ export const SavedScreen = ({ activeTab, onTabChange, onItemClick }) => {
                                     </div>
                                     <div className="p-4 flex items-center gap-3">
                                         <button
-                                            onClick={() => onItemClick && onItemClick(item.mapItem)}
+                                            onClick={() => onItemClick && onItemClick(item.mapItem || item)} // Handle mock vs real structure
                                             className="flex-1 bg-red-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-red-500/30 flex items-center justify-center gap-2 active:scale-95 transition-transform"
                                         >
                                             Ir ahora <ArrowRight size={16} />
                                         </button>
-                                        <button onClick={() => handleDelete(item.id)} className="p-3 bg-gray-50 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+                                        <button onClick={() => handleDelete(item)} className="p-3 bg-gray-50 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
                                             <Trash2 size={20} />
                                         </button>
                                     </div>
@@ -287,7 +228,6 @@ export const SavedScreen = ({ activeTab, onTabChange, onItemClick }) => {
                             <Clock size={18} className="text-brand-500" />
                             <h2 className="text-lg font-black text-text tracking-tight">Próximamente</h2>
                         </div>
-                        {/* Horizontal Scroll or Vertical List? User asked for structure. Let's keep vertical for simplicity but styled differently */}
                         <div className="space-y-3">
                             {filteredUpcoming.map(item => (
                                 <div key={item.id} className="bg-white p-3 rounded-2xl flex gap-3 border border-gray-100 shadow-sm">
@@ -302,13 +242,16 @@ export const SavedScreen = ({ activeTab, onTabChange, onItemClick }) => {
                                         </p>
                                         <div className="flex gap-2">
                                             <button
-                                                onClick={() => onItemClick && onItemClick(item.mapItem)}
+                                                onClick={() => onItemClick && onItemClick(item.mapItem || item)}
                                                 className="px-3 py-1.5 bg-brand-50 text-brand-700 text-xs font-bold rounded-lg"
                                             >
                                                 Ver detalle
                                             </button>
                                             <button onClick={() => handleShare(item)} className="p-1.5 text-gray-400 hover:text-gray-600">
                                                 <Share2 size={14} />
+                                            </button>
+                                            <button onClick={() => handleDelete(item)} className="p-1.5 text-gray-400 hover:text-red-500">
+                                                <Trash2 size={14} />
                                             </button>
                                         </div>
                                     </div>
@@ -330,7 +273,7 @@ export const SavedScreen = ({ activeTab, onTabChange, onItemClick }) => {
                                 <div key={item.id} className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm flex flex-col">
                                     <div className="h-28 bg-gray-100 relative">
                                         <img src={item.image} className="w-full h-full object-cover" />
-                                        <button onClick={() => handleDelete(item.id)} className="absolute top-2 right-2 p-1.5 bg-black/40 backdrop-blur-md rounded-full text-white/80 hover:bg-red-500 hover:text-white transition-colors">
+                                        <button onClick={() => handleDelete(item)} className="absolute top-2 right-2 p-1.5 bg-black/40 backdrop-blur-md rounded-full text-white/80 hover:bg-red-500 hover:text-white transition-colors">
                                             <Trash2 size={12} />
                                         </button>
                                     </div>
@@ -340,7 +283,7 @@ export const SavedScreen = ({ activeTab, onTabChange, onItemClick }) => {
                                             <p className="text-[10px] text-muted">{item.distance}</p>
                                         </div>
                                         <button
-                                            onClick={() => onItemClick && onItemClick(item.mapItem)}
+                                            onClick={() => onItemClick && onItemClick(item.mapItem || item)}
                                             className="mt-3 w-full py-1.5 bg-gray-50 text-gray-600 text-[10px] font-bold rounded-lg hover:bg-gray-100 transition-colors"
                                         >
                                             Ver espacio
@@ -381,7 +324,7 @@ export const SavedScreen = ({ activeTab, onTabChange, onItemClick }) => {
                                                     <h3 className="font-bold text-sm text-text">{item.title}</h3>
                                                     <p className="text-xs text-muted">Finalizado</p>
                                                 </div>
-                                                <button onClick={() => handleDelete(item.id)} className="text-gray-400 hover:text-red-500">
+                                                <button onClick={() => handleDelete(item)} className="text-gray-400 hover:text-red-500">
                                                     <Trash2 size={14} />
                                                 </button>
                                             </div>
