@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { Clock, MapPin, Zap, Calendar, ArrowRight, Music, Utensils, Beer } from 'lucide-react';
+import { Clock, MapPin, Zap, Calendar, ArrowRight, Music, Utensils, Beer, Sparkles, Users, Heart } from 'lucide-react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 
 // -----------------------------------------------------------------------------
@@ -10,96 +10,88 @@ const getCategoryIcon = (category) => {
         case 'música': return <Music size={12} />;
         case 'comida': return <Utensils size={12} />;
         case 'fiesta': return <Beer size={12} />;
+        case 'cultura': return <Sparkles size={12} />;
         default: return <Zap size={12} />;
     }
 };
 
 // -----------------------------------------------------------------------------
-// 1. LIVE CARD (Standard Moop - No Social Features)
+// 1. LIVE CARD (Premium Design - Glassmorphism)
 // -----------------------------------------------------------------------------
 export const LiveCard = ({ item, onClick }) => {
     return (
         <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => onClick(item)}
-            className="w-full bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 mb-6 cursor-pointer group"
+            className="w-full rounded-[28px] overflow-hidden mb-5 cursor-pointer group relative"
         >
-            {/* Image Header with LIVE Badge */}
-            <div className="h-56 relative">
-                <ImageWithFallback src={item.image} alt={item.title} className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-90" />
+            {/* Background Image */}
+            <div className="h-72 relative">
+                <ImageWithFallback
+                    src={item.image || item.imageUrl}
+                    alt={item.title}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
 
-                {/* LIVE Badge */}
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+
+                {/* Animated Glow Effect */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-tr from-brand-500/20 to-purple-500/10" />
+
+                {/* LIVE Badge with Pulse */}
                 <div className="absolute top-4 left-4">
-                    <div className="flex items-center gap-2 bg-red-600 text-white px-3 py-1 rounded-full shadow-lg shadow-red-600/20 backdrop-blur-md border border-white/10">
-                        <span className="relative flex h-2.5 w-2.5">
+                    <motion.div
+                        animate={{ scale: [1, 1.05, 1] }}
+                        transition={{ repeat: Infinity, duration: 2 }}
+                        className="flex items-center gap-2 bg-red-500/90 backdrop-blur-md text-white px-4 py-1.5 rounded-full shadow-lg shadow-red-500/30 border border-white/20"
+                    >
+                        <span className="relative flex h-2 w-2">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
                         </span>
-                        <span className="text-[10px] font-black tracking-widest uppercase">LIVE</span>
-                    </div>
+                        <span className="text-[11px] font-black tracking-wider uppercase">AHORA</span>
+                    </motion.div>
                 </div>
 
-                {/* Content Overlay */}
-                <div className="absolute bottom-5 left-5 right-5 text-white">
-                    <div className="flex items-center gap-2 mb-2">
-                        <span className="text-2xl">{item.emoji}</span>
-                        <span className="text-[10px] font-bold uppercase tracking-wide opacity-80 border border-white/30 px-2 py-0.5 rounded-md">
-                            {item.category || 'Moop'}
-                        </span>
+                {/* Interest Count Badge */}
+                {item.attendees && (
+                    <div className="absolute top-4 right-4 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 flex items-center gap-1.5">
+                        <Users size={12} className="text-white" />
+                        <span className="text-white text-[11px] font-bold">{item.attendees}</span>
                     </div>
-                    <h3 className="text-2xl font-black leading-none mb-1 shadow-sm">{item.title}</h3>
-                    <div className="flex items-center gap-1 text-sm text-gray-200 font-medium">
-                        <MapPin size={12} className="opacity-80" />
-                        <span>{item.time || 'Ahora mismo'} · {item.distance || 'Cerca'}</span>
-                    </div>
-                </div>
-            </div>
-        </motion.div>
-    );
-};
+                )}
 
-// -----------------------------------------------------------------------------
-// 2. FLASH CARD (Yellow/Black - Urgent - Unique Action)
-// -----------------------------------------------------------------------------
-export const FlashCard = ({ item, onClick }) => {
-    // Flash opens specific "Ir ya" logic, passed via onClick from parent but handled distinctively visually
-    return (
-        <motion.div
-            whileTap={{ scale: 0.95 }}
-            onClick={() => onClick(item)} // Flash might need specific handling upstream, but standard click usually works
-            className="w-full bg-yellow-400 rounded-3xl p-5 mb-6 shadow-xl shadow-yellow-400/20 relative overflow-hidden cursor-pointer border border-yellow-300"
-        >
-            <div className="absolute -right-6 -top-6 text-yellow-300 opacity-50 rotate-12">
-                <Zap size={120} fill="currentColor" />
-            </div>
-
-            <div className="relative z-10 flex items-center justify-between">
-                <div className="flex-1 pr-4">
-                    <div className="flex items-center gap-2 mb-2">
-                        <span className="bg-black text-white text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-widest flex items-center gap-1">
-                            <Zap size={8} fill="currentColor" /> FLASH
-                        </span>
-                        <span className="text-[10px] font-bold text-black/60 uppercase tracking-wide">
-                            Solo {item.expiresIn || '1h'}
+                {/* Content */}
+                <div className="absolute bottom-0 left-0 right-0 p-5">
+                    {/* Category Tag */}
+                    <div className="flex items-center gap-2 mb-3">
+                        <span className="text-2xl">{item.emoji || '🔥'}</span>
+                        <span className="bg-white/10 backdrop-blur-sm text-white/90 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-white/10">
+                            {item.category || item.place || 'Moop'}
                         </span>
                     </div>
-                    <h3 className="text-2xl font-black text-black leading-tight mb-3">
+
+                    {/* Title */}
+                    <h3 className="text-2xl font-black text-white leading-tight mb-2 drop-shadow-lg">
                         {item.title}
                     </h3>
-                    <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center text-black">
-                            <Clock size={14} />
-                        </div>
-                        <p className="text-xs font-bold text-black/70 leading-tight">
-                            {item.description || 'Oferta por tiempo limitado'}
-                        </p>
-                    </div>
-                </div>
 
-                {/* Visual Action Indicator */}
-                <div className="bg-black text-white p-3 rounded-full flex items-center justify-center shadow-lg">
-                    <ArrowRight size={20} />
+                    {/* Meta Info */}
+                    <div className="flex items-center gap-3 text-white/80">
+                        <div className="flex items-center gap-1.5 text-sm font-medium">
+                            <MapPin size={14} className="text-brand-300" />
+                            <span>{item.distance || 'Cerca'}</span>
+                        </div>
+                        {item.time && (
+                            <div className="flex items-center gap-1.5 text-sm font-medium">
+                                <Clock size={14} className="text-brand-300" />
+                                <span>{item.time}</span>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </motion.div>
@@ -107,44 +99,122 @@ export const FlashCard = ({ item, onClick }) => {
 };
 
 // -----------------------------------------------------------------------------
-// 3. EVENT CARD (Cultural/General - Standard Click)
+// 2. FLASH CARD (Urgent - Yellow/Black with Glow)
+// -----------------------------------------------------------------------------
+export const FlashCard = ({ item, onClick }) => {
+    return (
+        <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => onClick(item)}
+            className="w-full bg-gradient-to-br from-yellow-400 via-yellow-400 to-amber-500 rounded-[28px] p-5 mb-5 shadow-xl shadow-yellow-500/30 relative overflow-hidden cursor-pointer"
+        >
+            {/* Background Pattern */}
+            <div className="absolute inset-0 opacity-10">
+                <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-black/20" />
+                <div className="absolute -left-5 -bottom-5 w-32 h-32 rounded-full bg-black/10" />
+            </div>
+
+            {/* Zap Icon Background */}
+            <div className="absolute -right-4 -top-4 text-yellow-300/40">
+                <Zap size={100} fill="currentColor" />
+            </div>
+
+            <div className="relative z-10">
+                {/* Header */}
+                <div className="flex items-center gap-3 mb-4">
+                    <span className="bg-black text-white text-[10px] font-black px-3 py-1 rounded-lg uppercase tracking-widest flex items-center gap-1.5 shadow-md">
+                        <Zap size={10} fill="currentColor" /> FLASH
+                    </span>
+                    <span className="text-black/60 text-xs font-bold uppercase tracking-wide">
+                        ⏱ {item.timeLeft || item.expiresIn || '45min'}
+                    </span>
+                </div>
+
+                {/* Title */}
+                <h3 className="text-2xl font-black text-black leading-tight mb-3">
+                    {item.title}
+                </h3>
+
+                {/* Description */}
+                <p className="text-sm font-bold text-black/70 mb-4 leading-snug">
+                    {item.description || item.place || 'Oferta por tiempo limitado'}
+                </p>
+
+                {/* CTA */}
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-black/60 text-sm font-bold">
+                        <MapPin size={14} />
+                        <span>{item.distance || 'Muy cerca'}</span>
+                    </div>
+                    <div className="bg-black text-white px-5 py-2.5 rounded-full font-black text-sm flex items-center gap-2 shadow-lg">
+                        Ir ya <ArrowRight size={16} />
+                    </div>
+                </div>
+            </div>
+        </motion.div>
+    );
+};
+
+// -----------------------------------------------------------------------------
+// 3. EVENT CARD (Cultural - Elegant Design)
 // -----------------------------------------------------------------------------
 export const EventCard = ({ item, onClick }) => {
     return (
         <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => onClick(item)}
-            className="w-full bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 mb-6 cursor-pointer group"
+            className="w-full rounded-[28px] overflow-hidden mb-5 cursor-pointer group relative bg-white border border-gray-100 shadow-sm"
         >
-            <div className="h-56 relative">
-                <ImageWithFallback src={item.image} alt={item.title} className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-500" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+            {/* Image */}
+            <div className="h-52 relative overflow-hidden">
+                <ImageWithFallback
+                    src={item.image || item.imageUrl}
+                    alt={item.title}
+                    className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
                 {/* Category Badge */}
                 <div className="absolute top-4 left-4">
-                    <span className="bg-white/10 backdrop-blur-md text-white px-3 py-1 rounded-xl text-[10px] font-bold uppercase tracking-wide border border-white/20 flex items-center gap-1.5">
+                    <span className="bg-white/95 backdrop-blur-sm text-gray-900 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
                         {getCategoryIcon(item.category)}
-                        {item.category}
+                        {item.category || 'Evento'}
                     </span>
                 </div>
 
-                <div className="absolute bottom-5 left-5 right-5 text-white">
-                    <div className="flex items-center gap-2 mb-1.5 text-xs font-bold text-brand-200">
-                        <Calendar size={12} />
-                        <span className="uppercase tracking-wide">{item.date}</span>
+                {/* Date Badge */}
+                <div className="absolute top-4 right-4 bg-brand-500 text-white px-3 py-1.5 rounded-xl text-center min-w-[50px] shadow-lg">
+                    <div className="text-[10px] font-bold uppercase opacity-80">
+                        {item.month || 'ENE'}
                     </div>
-                    <h3 className="text-2xl font-black leading-tight mb-2 line-clamp-2">{item.title}</h3>
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1 text-sm text-gray-300 font-medium">
-                            <MapPin size={12} />
-                            <span>{item.location}</span>
-                        </div>
-                        {/* Subtle arrow to indicate clickable */}
-                        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <ArrowRight size={14} />
-                        </div>
+                    <div className="text-lg font-black leading-none">
+                        {item.day || '15'}
                     </div>
+                </div>
 
+                {/* Title on Image */}
+                <div className="absolute bottom-4 left-4 right-4">
+                    <h3 className="text-xl font-black text-white leading-tight drop-shadow-lg line-clamp-2">
+                        {item.title}
+                    </h3>
+                </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-4">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-gray-500 text-sm font-medium">
+                        <MapPin size={14} className="text-brand-500" />
+                        <span className="line-clamp-1">{item.location || item.place || 'Ver ubicación'}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-gray-400 text-xs font-bold">
+                        <Heart size={12} />
+                        <span>{item.interested || Math.floor(Math.random() * 50) + 10}</span>
+                    </div>
                 </div>
             </div>
         </motion.div>
@@ -152,33 +222,52 @@ export const EventCard = ({ item, onClick }) => {
 };
 
 // -----------------------------------------------------------------------------
-// 4. ROUTE CARD (Itinerary - Standard Click)
+// 4. ROUTE CARD (Itinerary - Dark Premium)
 // -----------------------------------------------------------------------------
 export const RouteCard = ({ item, onClick }) => {
     return (
         <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => onClick(item)}
-            className="w-full bg-gray-900 rounded-3xl overflow-hidden shadow-md mb-6 cursor-pointer relative group"
+            className="w-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-[28px] overflow-hidden mb-5 cursor-pointer relative group"
         >
-            <div className="h-64 relative opacity-60 mix-blend-overlay">
-                <ImageWithFallback src={item.image} className="w-full h-full object-cover grayscale" />
+            {/* Background Image */}
+            <div className="h-56 relative">
+                <ImageWithFallback
+                    src={item.image || item.imageUrl}
+                    className="w-full h-full object-cover opacity-40 mix-blend-overlay grayscale transition-all duration-500 group-hover:opacity-50"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-gray-900/50" />
             </div>
 
-            <div className="absolute inset-0 flex flex-col justify-between p-6 z-10">
+            {/* Content Overlay */}
+            <div className="absolute inset-0 flex flex-col justify-between p-5 z-10">
+                {/* Badge */}
                 <div className="flex justify-between items-start">
-                    <span className="bg-white text-black px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest border border-black transform -rotate-2">
-                        RUTA
+                    <span className="bg-white text-black px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md transform -rotate-1">
+                        🗺️ RUTA
                     </span>
+                    <div className="bg-brand-500/20 text-brand-300 px-3 py-1 rounded-lg text-[10px] font-bold border border-brand-500/30">
+                        {item.stops || 4} paradas
+                    </div>
                 </div>
 
+                {/* Title & Meta */}
                 <div>
-                    <h3 className="text-2xl font-black text-white leading-tight mb-2 border-l-4 border-brand-500 pl-3">
+                    <h3 className="text-2xl font-black text-white leading-tight mb-3 border-l-4 border-brand-500 pl-4">
                         {item.title}
                     </h3>
-                    <div className="flex items-center gap-4 text-gray-300 text-xs font-bold uppercase tracking-wide pl-4">
-                        <span className="flex items-center gap-1"><Clock size={12} /> {item.duration}</span>
-                        <span className="flex items-center gap-1"><MapPin size={12} /> {item.stops} Paradas</span>
+                    <div className="flex items-center gap-4 pl-5">
+                        <div className="flex items-center gap-1.5 text-gray-400 text-xs font-bold">
+                            <Clock size={12} className="text-brand-400" />
+                            <span>{item.duration || '2h 30min'}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-gray-400 text-xs font-bold">
+                            <MapPin size={12} className="text-brand-400" />
+                            <span>{item.distance || '3.2 km'}</span>
+                        </div>
                     </div>
                 </div>
             </div>
