@@ -200,7 +200,7 @@ const MapEventCard = ({ event, distance, onClose }) => {
                                     className="flex-1 bg-white text-black text-xs font-bold py-3 rounded-lg flex items-center justify-center gap-1.5 active:scale-95 transition-transform"
                                 >
                                     <Users size={14} className="text-indigo-600" />
-                                    Ver quién va
+                                    Personas interesadas
                                 </button>
                                 <button
                                     onClick={dismissOverlay}
