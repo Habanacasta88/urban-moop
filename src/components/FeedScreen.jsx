@@ -230,9 +230,9 @@ export const FeedScreen = ({ activeTab, onTabChange }) => {
 
         // 2. Apply Manual Filters
         if (activeFilter === 'Para ti') return items;
-        if (activeFilter === 'Moops') return items.filter(i => i.type === 'moop');
+        if (activeFilter === 'Moops') return items.filter(i => i.type === 'moop' || i.type === 'live');
+        if (activeFilter === 'Cultura') return items.filter(i => i.category?.toLowerCase().includes('cultura') || i.type === 'event' || i.type === 'route');
         if (activeFilter === 'Flash') return items.filter(i => i.type === 'flash');
-        if (activeFilter === 'Comer') return items.filter(i => i.category === 'food' || i.category === 'drink');
 
         return items;
     }, [activeFilter, RAW_FEED_ITEMS]);
@@ -317,8 +317,8 @@ export const FeedScreen = ({ activeTab, onTabChange }) => {
                 {!isSearching && (
                     <div className="flex gap-2 overflow-x-auto px-5 pb-2 no-scrollbar scroll-pl-5">
                         <QuickFilter label="⚡ Para ti" active={activeFilter === 'Para ti'} onClick={() => setActiveFilter('Para ti')} />
-                        <QuickFilter label="👥 Moops" active={activeFilter === 'Moops'} onClick={() => setActiveFilter('Moops')} />
-                        <QuickFilter label="🍔 Comer" active={activeFilter === 'Comer'} onClick={() => setActiveFilter('Comer')} />
+                        <QuickFilter label="🟣 Moops" active={activeFilter === 'Moops'} onClick={() => setActiveFilter('Moops')} />
+                        <QuickFilter label="🏛️ Cultura" active={activeFilter === 'Cultura'} onClick={() => setActiveFilter('Cultura')} />
                         <QuickFilter label="⚡ Flash" active={activeFilter === 'Flash'} onClick={() => setActiveFilter('Flash')} />
                     </div>
                 )}
