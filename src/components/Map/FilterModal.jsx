@@ -7,14 +7,6 @@ export const FilterModal = ({ isOpen, onClose, onApply, currentFilters }) => {
     // Intents Definition
     const INTENTS = [
         {
-            id: 'you',
-            label: 'Para ti',
-            subtitle: 'Smart Radar + Tus intereses',
-            icon: Sparkles,
-            color: 'brand',
-            filterConfig: { categories: [], sort: 'recommended', activeFilter: 'live' }
-        },
-        {
             id: 'moop',
             label: 'Moops',
             subtitle: 'Activaciones de locales',
@@ -39,6 +31,7 @@ export const FilterModal = ({ isOpen, onClose, onApply, currentFilters }) => {
             filterConfig: { categories: [], sort: 'distance', activeFilter: 'flash' }
         }
     ];
+
 
     if (!isOpen) return null;
 
@@ -88,9 +81,9 @@ export const FilterModal = ({ isOpen, onClose, onApply, currentFilters }) => {
                             className="w-full bg-white border border-gray-100 p-4 rounded-2xl flex items-center gap-4 hover:bg-gray-50 active:scale-95 transition-all shadow-sm hover:shadow-md group"
                         >
                             <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${intent.color === 'brand' ? 'bg-brand-50 text-brand-600' :
-                                    intent.color === 'purple' ? 'bg-purple-50 text-purple-600' :
-                                        intent.color === 'pink' ? 'bg-pink-50 text-pink-600' :
-                                            'bg-yellow-50 text-yellow-600'
+                                intent.color === 'purple' ? 'bg-purple-50 text-purple-600' :
+                                    intent.color === 'pink' ? 'bg-pink-50 text-pink-600' :
+                                        'bg-yellow-50 text-yellow-600'
                                 }`}>
                                 <intent.icon size={24} />
                             </div>
