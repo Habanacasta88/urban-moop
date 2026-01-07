@@ -5,123 +5,145 @@ import './Map.css';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
-// Custom Marker Component
-const CustomMarker = ({ type, emoji, isSelected, onClick, isFlash, isNew, attendees }) => {
-    let baseSize = isSelected ? 40 : 32;
-    let color = 'var(--color-primary)';
-    let glow = '';
-    let border = isSelected ? '3px solid white' : '2px solid rgba(255,255,255,0.9)';
-    let className = 'custom-pin transition-transform duration-300'; // Added duration for smooth hover/select
-    let zIndex = isSelected ? 100 : 10;
-    let pulseClass = '';
+// Enhanced Custom Marker Component with Emojis & Vibrant Design
+const CustomMarker = ({ type, emoji, isSelected, onClick, isFlash, isLive, attendees, category }) => {
+    // Size based on importance
+    let baseSize = isSelected ? 52 : 44;
 
-    // Logic for Types
-    if (type === 'massive') {
-        baseSize = isSelected ? 55 : 45;
-        color = '#FF0055'; // Pink
-        pulseClass = 'pulse-ring';
-    } else if (type === 'moop') {
-        baseSize = isSelected ? 42 : 36;
-        color = '#06b6d4'; // Cyan
-        pulseClass = 'pulse-ring';
-    } else if (type === 'promo') {
-        baseSize = isSelected ? 44 : 36;
-        color = '#F59E0B'; // Amber
-        if (isFlash) {
-            color = '#8B5CF6'; // Violet for Flash
-            pulseClass = 'pulse-ring';
-        }
-    } else if (type === 'trending') {
-        baseSize = isSelected ? 48 : 40;
-        color = '#EF4444'; // Red
-        pulseClass = 'pulse-ring';
+    // Vibrant color palette based on type/category
+    let color = '#8B5CF6'; // Default purple
+    let pulseColor = 'rgba(139, 92, 246, 0.4)';
+
+    if (type === 'moop' || isLive) {
+        color = '#06B6D4'; // Cyan for Moops
+        pulseColor = 'rgba(6, 182, 212, 0.5)';
+    } else if (type === 'event') {
+        color = '#8B5CF6'; // Purple for events
+        pulseColor = 'rgba(139, 92, 246, 0.4)';
+    } else if (type === 'massive' || type === 'trending') {
+        color = '#F43F5E'; // Rose for trending
+        pulseColor = 'rgba(244, 63, 94, 0.4)';
+        baseSize = isSelected ? 58 : 50;
+    } else if (isFlash) {
+        color = '#FBBF24'; // Amber for Flash
+        pulseColor = 'rgba(251, 191, 36, 0.5)';
     }
 
-    // Selected State overrides
-    if (isSelected) {
-        className += ' marker-heartbeat'; // from Map.css
-        glow = `0 0 20px ${color}, 0 0 0 4px rgba(255, 255, 255, 0.4)`;
-        zIndex = 1000;
-    } else {
-        glow = `0 4px 6px rgba(0,0,0,0.3)`;
-    }
+    // Default emoji based on category if not provided
+    const displayEmoji = emoji || getCategoryEmoji(category, type);
 
     return (
-        <div className="relative flex items-center justify-center">
-            {/* Heatmap/Glow Effect for Trending/Massive */}
-            {(type === 'trending' || type === 'massive') && (
-                <div className="heatmap-glow" />
-            )}
-
+        <div
+            className="relative flex items-center justify-center cursor-pointer"
+            onClick={onClick}
+            style={{ zIndex: isSelected ? 1000 : 10 }}
+        >
+            {/* Outer Pulse Ring */}
             <div
-                className={`${className} ${!isSelected && pulseClass}`}
-                onClick={onClick}
+                className="absolute rounded-full animate-ping"
                 style={{
-                    background: color,
+                    width: `${baseSize + 20}px`,
+                    height: `${baseSize + 20}px`,
+                    backgroundColor: pulseColor,
+                    animationDuration: '2s',
+                }}
+            />
+
+            {/* Inner Pulse Ring */}
+            <div
+                className="absolute rounded-full"
+                style={{
+                    width: `${baseSize + 12}px`,
+                    height: `${baseSize + 12}px`,
+                    backgroundColor: pulseColor,
+                    animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                }}
+            />
+
+            {/* Main Marker Circle */}
+            <div
+                className={`relative flex items-center justify-center rounded-full transition-all duration-300 ${isSelected ? 'scale-110 ring-4 ring-white/50' : 'hover:scale-105'
+                    }`}
+                style={{
                     width: `${baseSize}px`,
                     height: `${baseSize}px`,
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: glow,
-                    border: border,
-                    fontSize: `${baseSize * 0.55}px`,
-                    cursor: 'pointer',
-                    zIndex: zIndex
+                    backgroundColor: color,
+                    boxShadow: isSelected
+                        ? `0 0 25px ${color}, 0 4px 15px rgba(0,0,0,0.3)`
+                        : `0 4px 12px rgba(0,0,0,0.25)`,
+                    border: '3px solid rgba(255,255,255,0.9)',
                 }}
             >
-                {emoji}
+                {/* Emoji */}
+                <span
+                    className="text-center leading-none drop-shadow-sm"
+                    style={{ fontSize: `${baseSize * 0.5}px` }}
+                >
+                    {displayEmoji}
+                </span>
 
-                {/* Semantic Triangle for Selected */}
+                {/* Selection Triangle */}
                 {isSelected && (
                     <div
+                        className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0"
                         style={{
-                            position: 'absolute',
-                            bottom: '-8px',
-                            left: '50%',
-                            transform: 'translateX(-50%)',
-                            width: 0,
-                            height: 0,
-                            borderLeft: '6px solid transparent',
-                            borderRight: '6px solid transparent',
-                            borderTop: '8px solid white',
+                            borderLeft: '8px solid transparent',
+                            borderRight: '8px solid transparent',
+                            borderTop: `10px solid ${color}`,
                         }}
                     />
                 )}
             </div>
 
-            {/* Badges - Absolute position relative to the wrapper */}
-            {/* LIVE Badge (Moops) */}
-            {type === 'moop' && (
-                <div className="marker-badge -top-3 -right-3 bg-red-600 text-white">
+            {/* LIVE Badge */}
+            {(type === 'moop' || isLive) && (
+                <div className="absolute -top-2 -right-1 bg-red-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-lg animate-pulse border border-white/50">
                     LIVE
                 </div>
             )}
 
             {/* FLASH Badge */}
             {isFlash && (
-                <div className="marker-badge -top-3 -right-3 bg-yellow-400 text-gray-900 border border-yellow-200">
-                    FLASH
+                <div className="absolute -top-2 -right-1 bg-yellow-400 text-black text-[9px] font-black px-2 py-0.5 rounded-full shadow-lg animate-bounce border border-yellow-200">
+                    ⚡ FLASH
                 </div>
             )}
 
-            {/* NEW Badge */}
-            {isNew && !isFlash && type !== 'moop' && (
-                <div className="marker-badge -top-3 -right-3 bg-blue-500 text-white">
-                    NEW
+            {/* Attendees Count Badge */}
+            {attendees && attendees > 5 && !isFlash && (
+                <div className="absolute -bottom-2 -right-1 bg-white text-gray-800 text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-md border border-gray-200">
+                    +{attendees}
                 </div>
             )}
         </div>
     );
 };
 
+// Helper to get emoji based on category
+const getCategoryEmoji = (category, type) => {
+    if (type === 'moop') return '🎉';
+    if (type === 'flash') return '⚡';
+
+    const cat = category?.toLowerCase() || '';
+    if (cat.includes('música') || cat.includes('music')) return '🎵';
+    if (cat.includes('comida') || cat.includes('food') || cat.includes('gastronomía')) return '🍽️';
+    if (cat.includes('fiesta') || cat.includes('party')) return '🎉';
+    if (cat.includes('cultura') || cat.includes('culture')) return '🏛️';
+    if (cat.includes('deporte') || cat.includes('sport')) return '⚽';
+    if (cat.includes('arte') || cat.includes('art')) return '🎨';
+    if (cat.includes('mercado') || cat.includes('market')) return '🎄';
+    if (cat.includes('café') || cat.includes('coffee')) return '☕';
+    if (cat.includes('beer') || cat.includes('cerveza')) return '🍺';
+    if (cat.includes('yoga') || cat.includes('bienestar')) return '🧘';
+
+    return '📍';
+};
+
 const EmotionalMap = ({ events, selectedId, onSelect }) => {
-    // Sabadell Coords
     const initialViewState = {
         latitude: 41.543296,
         longitude: 2.109420,
-        zoom: 14
+        zoom: 14.5
     };
 
     const mapRef = useRef(null);
@@ -133,14 +155,13 @@ const EmotionalMap = ({ events, selectedId, onSelect }) => {
                 mapRef.current.flyTo({
                     center: [evt.lng, evt.lat],
                     zoom: 16,
-                    duration: 1200,
+                    duration: 800,
                     essential: true
                 });
             }
         }
     }, [selectedId, events]);
 
-    // Handle missing token gracefully
     if (!MAPBOX_TOKEN || MAPBOX_TOKEN === 'pk.YOUR_TOKEN_HERE') {
         return (
             <div className="flex items-center justify-center h-full w-full bg-gray-900 text-white p-6 text-center">
@@ -177,19 +198,20 @@ const EmotionalMap = ({ events, selectedId, onSelect }) => {
                         <CustomMarker
                             type={evt.type}
                             emoji={evt.emoji}
+                            category={evt.category}
                             isFlash={evt.isFlash}
-                            isNew={evt.tags?.includes('Nuevo')}
+                            isLive={evt.isLive}
                             attendees={evt.attendees}
                             isSelected={selectedId === evt.id}
                             onClick={(e) => {
-                                e.stopPropagation();
+                                e?.stopPropagation?.();
                                 onSelect(evt);
                             }}
                         />
                     </Marker>
                 ))}
             </Map>
-        </div >
+        </div>
     );
 };
 
