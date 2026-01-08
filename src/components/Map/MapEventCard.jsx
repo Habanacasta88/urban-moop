@@ -114,31 +114,21 @@ const MapEventCard = ({ event, distance, onClose }) => {
                         <p className="text-sm font-bold text-gray-900">Quedan 2h 39min</p>
                     </div>
 
-                    {/* Live Attendees */}
-                    <div className="col-span-2 bg-indigo-50 p-4 rounded-2xl flex items-center justify-between border border-indigo-100">
-                        <div className="flex items-center gap-3">
-                            <div className="relative">
-                                <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
-                                </span>
-                                <Users size={18} className="text-indigo-600" />
-                            </div>
-                            <div>
-                                <p className="text-sm font-bold text-indigo-900 leading-none">12 personas ya están yendo</p>
-                                <p className="text-[10px] text-indigo-600 font-medium mt-0.5 opacity-80">Gente del barrio como tú</p>
-                            </div>
+                    {/* Activity Signal - Neutral, no exact numbers */}
+                    <div className="col-span-2 bg-brand-50 p-4 rounded-2xl flex items-center gap-3 border border-brand-100">
+                        <div className="relative">
+                            <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                            </span>
+                            <Activity size={18} className="text-brand-600" />
                         </div>
-                        {/* Avatar Stack */}
-                        <div className="flex -space-x-2">
-                            {attendees.slice(0, 3).map(u => (
-                                <img key={u.id} src={u.avatar} alt={u.name} className="w-8 h-8 rounded-full border-2 border-white object-cover" />
-                            ))}
-                            <div className="w-8 h-8 rounded-full bg-indigo-200 border-2 border-white flex items-center justify-center text-[10px] font-bold text-indigo-700">
-                                +9
-                            </div>
+                        <div>
+                            <p className="text-sm font-bold text-brand-900 leading-none">Actividad ahora</p>
+                            <p className="text-xs text-brand-600 font-medium mt-0.5 opacity-80">Hay interés en este plan</p>
                         </div>
                     </div>
+
                 </div>
 
                 {/* Description */}
