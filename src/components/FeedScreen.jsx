@@ -128,15 +128,18 @@ const RAW_FEED_ITEMS = [
 ];
 
 
-const QuickFilter = ({ label, active, onClick }) => (
+const QuickFilter = ({ label, active, onClick, hasIcon }) => (
     <button
         onClick={onClick}
-        className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 border ${active
-            ? 'bg-brand-600 text-white border-brand-600 shadow-lg shadow-brand-500/20'
-            : 'bg-surface text-text-2 border-border hover:bg-surface-2 hover:border-brand-200'
-            } `}
+        className={`flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full px-5 transition-all duration-200 active:scale-95 ${active
+                ? 'bg-[#0da6f2] shadow-lg shadow-[#0da6f2]/20'
+                : 'bg-[#223c49] hover:bg-[#0da6f2]/20'
+            }`}
     >
-        {label}
+        <span className={`text-sm font-${active ? 'bold' : 'medium'} leading-normal ${active ? 'text-white' : 'text-white/80'
+            }`}>
+            {label}
+        </span>
     </button>
 );
 
@@ -258,45 +261,34 @@ export const FeedScreen = ({ activeTab, onTabChange }) => {
     };
 
     return (
-        <div className="relative w-full min-h-screen bg-bg pb-24 font-sf text-text">
+        <div className="relative w-full min-h-screen bg-[#101c22] pb-24 font-display text-white">
 
-            {/* 1. HEADER (Fixed) */}
-            <div className="sticky top-0 z-30 bg-bg/95 backdrop-blur-xl border-b border-border pb-2 transition-all">
-                <div className="px-5 pt-14 pb-3">
-                    {/* Dynamic Header: Smart Radar OR Search Bar */}
-                    {!isSearching ? (
-                        <div className="flex justify-between items-start transition-all">
-                            <div>
-                                <div className="flex items-center gap-2 mb-0.5">
-                                    <span className="relative flex h-2 w-2">
-                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
-                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-600"></span>
-                                    </span>
-                                    <h2 className="text-xs font-bold text-brand-700 uppercase tracking-widest">Live ahora · Sabadell</h2>
-                                </div>
-                                <h1 className="text-xl font-black text-brand-700 leading-tight">
-                                    Smart Radar
-                                </h1>
-                            </div>
-                            <button
-                                onClick={() => setIsSearching(true)}
-                                className="w-10 h-10 flex items-center justify-center rounded-full bg-surface border border-border text-muted hover:text-brand-600 hover:border-brand-200 transition-all shadow-sm"
-                            >
-                                <Search size={20} />
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="relative flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+            {/* 1. HEADER (Fixed) - Dark Theme */}
+            <header className="sticky top-0 z-30 bg-[#101c22]/95 backdrop-blur-md transition-all">
+                <div className="flex items-center justify-between p-4 pb-2">
+                    <h2 className="text-2xl font-bold tracking-tight pl-2">Explora</h2>
+                    <button
+                        onClick={() => setIsSearching(!isSearching)}
+                        className="flex size-10 items-center justify-center rounded-full bg-[#223c49]/50 hover:bg-[#223c49] text-white transition-colors"
+                    >
+                        <Search size={20} />
+                    </button>
+                </div>
+
+                {/* Search Bar (Conditional) */}
+                {isSearching && (
+                    <div className="px-4 pb-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <div className="relative flex items-center gap-2">
                             <div className="relative flex-1">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-500" size={18} />
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#0da6f2]" size={18} />
                                 <input
                                     type="text"
                                     autoFocus
-                                    placeholder="¿Qué te apetece hoy? (ej: cena romántica)"
+                                    placeholder="¿Qué te apetece hoy?"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     onKeyDown={handleSearch}
-                                    className="w-full pl-10 pr-4 py-3 bg-surface rounded-xl border border-brand-200 text-text font-medium placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 shadow-lg shadow-brand-500/5"
+                                    className="w-full pl-10 pr-4 py-3 bg-[#182b34] rounded-xl border border-[#223c49] text-white font-medium placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#0da6f2]/30 focus:border-[#0da6f2]"
                                 />
                             </div>
                             <button
@@ -305,24 +297,27 @@ export const FeedScreen = ({ activeTab, onTabChange }) => {
                                     setSearchResults(null);
                                     setSearchQuery('');
                                 }}
-                                className="text-sm font-bold text-muted hover:text-text px-2"
+                                className="text-sm font-bold text-gray-400 hover:text-white px-2"
                             >
                                 Cancelar
                             </button>
                         </div>
-                    )}
-                </div>
+                    </div>
+                )}
 
-                {/* Quick Filters (Hide if searching/results active?) -> Maybe keep them as fallback context */}
+                {/* Filters */}
                 {!isSearching && (
-                    <div className="flex gap-2 overflow-x-auto px-5 pb-2 no-scrollbar scroll-pl-5">
-                        <QuickFilter label="⚡ Para ti" active={activeFilter === 'Para ti'} onClick={() => setActiveFilter('Para ti')} />
-                        <QuickFilter label="🟣 Moops" active={activeFilter === 'Moops'} onClick={() => setActiveFilter('Moops')} />
-                        <QuickFilter label="🏛️ Cultura" active={activeFilter === 'Cultura'} onClick={() => setActiveFilter('Cultura')} />
+                    <div className="flex gap-3 px-4 py-3 overflow-x-auto no-scrollbar">
+                        <QuickFilter label="Para ti" active={activeFilter === 'Para ti'} onClick={() => setActiveFilter('Para ti')} />
+                        <QuickFilter label="Moops" active={activeFilter === 'Moops'} onClick={() => setActiveFilter('Moops')} />
+                        <QuickFilter label="Cultura" active={activeFilter === 'Cultura'} onClick={() => setActiveFilter('Cultura')} />
                         <QuickFilter label="⚡ Flash" active={activeFilter === 'Flash'} onClick={() => setActiveFilter('Flash')} />
                     </div>
                 )}
-            </div>
+
+                {/* Gradient Fade */}
+                <div className="h-6 bg-gradient-to-b from-[#101c22] to-transparent"></div>
+            </header>
 
             {/* 2. FEED CONTENT or SEARCH RESULTS */}
             <div className="px-4 pt-4 pb-10 min-h-[50vh]">
