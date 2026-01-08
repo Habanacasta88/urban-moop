@@ -209,8 +209,8 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
                                 key={stateKey}
                                 onClick={() => setFilters(prev => ({ ...prev, time: stateKey }))}
                                 className={`flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full px-5 transition-transform active:scale-95 ${isActive
-                                        ? 'bg-black text-white shadow-lg'
-                                        : 'bg-white text-gray-600 border border-gray-100 shadow-sm hover:bg-gray-50'
+                                    ? 'bg-black text-white shadow-lg'
+                                    : 'bg-white text-gray-600 border border-gray-100 shadow-sm hover:bg-gray-50'
                                     }`}
                             >
                                 <span className="text-xs font-bold">{timeLabel}</span>
@@ -235,16 +235,16 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
                 />
             </div>
 
-            {/* 3. Swipeable Card (Z-Index 40) */}
+            {/* 3. Card Carousel (Z-Index 40) */}
             <AnimatePresence>
-                {viewMode === 'map' && currentSwipeEvent && !selectedEvent && (
+                {viewMode === 'map' && filteredEvents.length > 0 && !selectedEvent && (
                     <SwipeableEventCard
-                        key="swipe-card"
-                        event={currentSwipeEvent}
+                        key="card-carousel"
+                        events={filteredEvents}
+                        currentIndex={swipeIndex}
                         distance={getEventDistance(currentSwipeEvent)}
-                        onNext={handleNext}
-                        onPrev={handlePrev}
-                        onClick={() => setSelectedEvent(currentSwipeEvent)}
+                        onCardChange={(newIndex) => setSwipeIndex(newIndex)}
+                        onClick={(event) => setSelectedEvent(event)}
                     />
                 )}
             </AnimatePresence>
