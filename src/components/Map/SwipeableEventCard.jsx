@@ -1,12 +1,12 @@
 import { motion, useMotionValue, useTransform } from 'motion/react';
-import { MapPin, Clock, ChevronRight, ChevronLeft, Zap } from 'lucide-react';
+import { MapPin, Clock, ChevronRight, ChevronLeft, Bookmark, Share2 } from 'lucide-react';
 
 export const SwipeableEventCard = ({ event, distance, onNext, onPrev, onClick }) => {
     const x = useMotionValue(0);
     const opacity = useTransform(x, [-100, 0, 100], [0.5, 1, 0.5]);
-    const rotate = useTransform(x, [-100, 0, 100], [-5, 0, 5]);
+    const rotate = useTransform(x, [-100, 0, 100], [-3, 0, 3]);
 
-    const handleDragEnd = (e, { offset, velocity }) => {
+    const handleDragEnd = (e, { offset }) => {
         const swipeThreshold = 50;
         if (offset.x > swipeThreshold) {
             onPrev();
@@ -17,12 +17,13 @@ export const SwipeableEventCard = ({ event, distance, onNext, onPrev, onClick })
 
     if (!event) return null;
 
-    // Determine if event is happening now or in future
+    // Status badge logic
     const isNow = !event.rawStartTime || new Date(event.rawStartTime) <= new Date();
-    const timeLabel = isNow ? 'Ahora' : event.time || 'Hoy';
+    const statusLabel = isNow ? 'En curso' : 'Próximamente';
+    const statusColor = isNow ? 'blue' : 'orange';
 
     return (
-        <div className="absolute bottom-24 left-0 right-0 px-4 z-20 flex justify-center perspective-1000">
+        <div className="absolute bottom-28 left-0 right-0 px-4 z-20 flex justify-center">
             <motion.div
                 initial={{ y: 50, opacity: 0, scale: 0.95 }}
                 animate={{ y: 0, opacity: 1, scale: 1 }}
@@ -33,90 +34,73 @@ export const SwipeableEventCard = ({ event, distance, onNext, onPrev, onClick })
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={0.2}
                 onDragEnd={handleDragEnd}
-                onClick={onClick}
-                className="w-full bg-white rounded-3xl shadow-2xl overflow-hidden cursor-grab active:cursor-grabbing border border-white/60 relative"
+                className="w-full bg-white rounded-3xl p-5 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 cursor-grab active:cursor-grabbing"
             >
-                {/* Top Accent */}
-                <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-brand-500 to-brand-300 opacity-30" />
-
-                <div className="flex h-36">
-                    {/* Image Section */}
-                    <div
-                        className="w-1/3 relative h-full cursor-pointer group"
-                        onClick={(e) => { e.stopPropagation(); onPrev(); }}
-                    >
-                        {/* Prev Button Hint */}
-                        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition-colors">
-                            <ChevronLeft size={24} className="text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
-                        </div>
-                        <img
-                            src={event.image || event.imageUrl}
-                            alt={event.title}
-                            className="w-full h-full object-cover"
-                        />
-
-                        {/* SINGLE Badge - Only show Flash if it's flash, otherwise nothing */}
-                        {event.isFlash && (
-                            <div className="absolute top-2 left-2 bg-yellow-400 text-black text-[10px] font-black px-2 py-0.5 rounded shadow-sm border border-yellow-200 flex items-center gap-1">
-                                <Zap size={8} fill="black" /> FLASH
-                            </div>
-                        )}
-
-                        {/* Live Pulse - subtle activity indicator */}
-                        {!event.isFlash && (
-                            <div className="absolute bottom-2 left-2">
-                                <span className="relative flex h-2 w-2">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-500"></span>
+                <div className="flex flex-col gap-4">
+                    {/* Header Row */}
+                    <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                            {/* Status Badge */}
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className={`flex size-2 rounded-full bg-${statusColor}-500 animate-pulse`}></span>
+                                <span className={`text-${statusColor}-600 text-[10px] font-bold uppercase tracking-wider bg-${statusColor}-50 px-2 py-0.5 rounded-md`}>
+                                    {statusLabel}
                                 </span>
                             </div>
-                        )}
+
+                            {/* Title */}
+                            <h2 className="text-gray-900 text-2xl font-extrabold leading-tight tracking-tight">
+                                {event.title}
+                            </h2>
+
+                            {/* Location */}
+                            <p className="text-gray-500 text-sm mt-1 font-medium">
+                                {event.location?.name || event.location || event.place || 'Cerca de ti'}
+                            </p>
+                        </div>
+
+                        {/* Time Badge */}
+                        <div className="bg-gray-100 px-2.5 py-1.5 rounded-lg flex flex-col items-center">
+                            <span className="text-xs font-bold text-gray-900">
+                                {event.time || '20:00'}
+                            </span>
+                        </div>
                     </div>
 
-                    {/* Content Section - SIMPLIFIED */}
-                    <div className="w-2/3 p-4 flex flex-col justify-between relative bg-white">
-                        {/* Next Button */}
-                        <div
-                            onClick={(e) => { e.stopPropagation(); onNext(); }}
-                            className="absolute right-0 top-0 bottom-0 w-12 flex items-center justify-center cursor-pointer hover:bg-black/5 active:bg-black/10 transition-colors z-10"
-                        >
-                            <ChevronRight size={24} className="text-muted" />
+                    {/* Info Pills */}
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-1.5 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
+                            <MapPin size={14} className="text-gray-400" />
+                            <span className="text-xs font-bold text-gray-600">{distance || '200m'}</span>
                         </div>
-
-                        <div className="pr-10">
-                            {/* Title - Primary */}
-                            <h3 className="font-excep font-black text-text text-lg leading-tight line-clamp-2 mb-2">
-                                {event.title}
-                            </h3>
-
-                            {/* Time - Secondary */}
-                            <div className="flex items-center gap-1 text-xs text-brand-600 font-bold mb-1">
-                                <Clock size={12} />
-                                <span>{timeLabel}</span>
-                            </div>
-
-                            {/* Location - Tertiary */}
-                            <div className="flex items-center gap-1 text-xs text-muted font-medium">
-                                <MapPin size={12} />
-                                <span className="truncate">
-                                    {event.location?.name || event.location || 'Cerca de ti'}
-                                    {distance && <span className="ml-1">· {distance}</span>}
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Footer - Single CTA */}
-                        <div className="flex items-center justify-between mt-2">
-                            {/* Neutral Activity Signal - No exact numbers */}
-                            <span className="text-[10px] text-muted font-medium">
-                                {event.attendees > 0 ? 'Actividad ahora' : ''}
+                        <div className="flex items-center gap-1.5 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
+                            <Clock size={14} className="text-gray-400" />
+                            <span className="text-xs font-bold text-gray-600">
+                                {event.endsIn || '~ 1h left'}
                             </span>
-
-                            {/* CTA: "Ir" for now, "Me interesa" for future */}
-                            <button className="bg-gradient-to-r from-brand-600 to-brand-400 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg shadow-brand-500/20 active:scale-95 transition-transform">
-                                {isNow ? 'Ir' : 'Me interesa'}
-                            </button>
                         </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 mt-1">
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onClick(); }}
+                            className="flex-1 h-12 rounded-2xl bg-black text-white font-bold text-sm shadow-lg hover:bg-gray-800 transition-colors flex items-center justify-center"
+                        >
+                            Ver detalles
+                        </button>
+                        <button
+                            onClick={(e) => e.stopPropagation()}
+                            className="size-12 rounded-2xl bg-gray-50 text-gray-900 border border-gray-100 hover:bg-gray-100 transition-colors flex items-center justify-center"
+                        >
+                            <Bookmark size={20} />
+                        </button>
+                        <button
+                            onClick={(e) => e.stopPropagation()}
+                            className="size-12 rounded-2xl bg-gray-50 text-gray-900 border border-gray-100 hover:bg-gray-100 transition-colors flex items-center justify-center"
+                        >
+                            <Share2 size={20} />
+                        </button>
                     </div>
                 </div>
             </motion.div>

@@ -174,41 +174,33 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
 
 
     return (
-        <div className="relative w-full h-[100dvh] bg-surface-2 overflow-hidden font-sf">
+        <div className="relative w-full h-[100dvh] bg-gray-900 overflow-hidden font-sans">
 
-            {/* 1. Header & Filters (Z-Index 50) */}
-            <div className="absolute top-0 left-0 right-0 z-50 p-4">
-                <RadarHeader />
+            {/* 1. Header & Filters (Z-Index 50) - Glass Theme */}
+            <div className="absolute top-0 left-0 right-0 z-50 flex flex-col gap-3 pt-4 pointer-events-none">
 
-                {/* Search Bar & Menu Trigger */}
-                <div className="pointer-events-auto flex gap-3 mt-3">
-                    <div className="relative flex-1 group">
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted"><Search size={22} /></div>
-                        <input
-                            type="text"
-                            placeholder="¿Qué buscas hoy?"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full bg-surface rounded-2xl py-3.5 pl-12 pr-4 shadow-xl shadow-brand-500/5 border border-border text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20 placeholder:text-muted text-text"
-                        />
-                        {searchQuery && (
-                            <button onClick={() => setSearchQuery('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted"><X size={16} /></button>
-                        )}
+                {/* Glass Search Bar */}
+                <div className="px-5 pointer-events-auto">
+                    <div className="w-full h-14 bg-white/95 backdrop-blur-xl rounded-full shadow-lg flex items-center justify-between px-2 pr-2 border border-white/50">
+                        <div className="flex items-center gap-3 pl-4 flex-1">
+                            <Search size={20} className="text-gray-400" />
+                            <div className="flex flex-col justify-center">
+                                <span className="text-sm font-bold text-gray-900 leading-tight">Sabadell</span>
+                                <span className="text-[10px] font-medium text-gray-500 leading-tight">Explorar eventos cercanos</span>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => setIsFilterModalOpen(true)}
+                            className="size-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors pointer-events-auto"
+                        >
+                            <Menu size={20} className="text-gray-700" />
+                        </button>
                     </div>
-                    {/* MENU Toggle (Hamburger) */}
-                    <button
-                        onClick={() => setIsFilterModalOpen(true)}
-                        className="w-12 bg-white rounded-2xl shadow-xl shadow-brand-500/5 border border-border flex items-center justify-center text-gray-900 active:scale-95 transition-transform"
-                    >
-                        <Menu size={24} strokeWidth={2.5} />
-                    </button>
                 </div>
 
-                {/* VISIBLE TIME FILTERS */}
-                <div className="flex items-center gap-2 overflow-x-auto pb-2 mt-3 pointer-events-auto no-scrollbar scroll-pl-4">
-                    {['Hoy', 'Mañana', 'Este finde', 'Esta semana'].map((timeLabel) => {
-                        // Normalize key for state match ('Este finde' -> 'Finde' maybe? user asked for 'Este finde')
-                        // Let's map display label to internal state key for simplicity or use label as key
+                {/* Time Filter Pills */}
+                <div className="flex gap-2 px-5 overflow-x-auto scrollbar-hide py-2 pointer-events-auto">
+                    {['Hoy', 'Mañana', 'Este finde', 'Cultura'].map((timeLabel) => {
                         const stateKey = timeLabel === 'Este finde' ? 'Finde' : timeLabel;
                         const isActive = filters.time === stateKey;
 
@@ -216,13 +208,12 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
                             <button
                                 key={stateKey}
                                 onClick={() => setFilters(prev => ({ ...prev, time: stateKey }))}
-                                className={`px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap shadow-sm transition-all flex items-center gap-1.5 ${isActive
-                                        ? 'bg-brand-600 text-white scale-105 shadow-brand-500/20'
-                                        : 'bg-surface text-text border border-border text-gray-500 hover:bg-gray-50'
+                                className={`flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full px-5 transition-transform active:scale-95 ${isActive
+                                        ? 'bg-black text-white shadow-lg'
+                                        : 'bg-white text-gray-600 border border-gray-100 shadow-sm hover:bg-gray-50'
                                     }`}
                             >
-                                {timeLabel === 'Hoy' && '🔥 '}
-                                {timeLabel}
+                                <span className="text-xs font-bold">{timeLabel}</span>
                             </button>
                         );
                     })}
