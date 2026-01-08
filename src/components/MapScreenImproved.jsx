@@ -18,6 +18,7 @@ export const MapScreen = ({ activeTab, onTabChange, onNavigateToMoops, showOnboa
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+    const [swipeIndex, setSwipeIndex] = useState(0); // Current card index for carousel
 
     // Filter State
     // activeFilter (Intent): 'live' (Para ti), 'moop', 'flash', 'culture' (Mapped via modal)
