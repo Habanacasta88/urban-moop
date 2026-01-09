@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, MapPin, Share2, Trash2, Heart, ArrowRight, LogIn, Calendar, Clock, ChevronDown, ChevronUp, Map as MapIcon, Zap } from 'lucide-react';
+import { X, MapPin, Clock, ChevronRight, Bookmark, Settings } from 'lucide-react';
 import BottomNavigation from './Navigation/BottomNavigation';
 import { useAuth } from '../context/AuthContext';
 import { useActivity } from '../context/ActivityContext';
 import { LoginModal } from './LoginModal';
 import { LoadingSpinner } from './common/LoadingSpinner';
+import { ImageWithFallback } from './figma/ImageWithFallback';
 
 export const SavedScreen = ({ activeTab, onTabChange, onItemClick }) => {
     const { user } = useAuth();
@@ -13,9 +14,7 @@ export const SavedScreen = ({ activeTab, onTabChange, onItemClick }) => {
 
     // UI State
     const [loading, setLoading] = useState(true);
-    const [searchQuery, setSearchQuery] = useState('');
     const [showLoginModal, setShowLoginModal] = useState(false);
-    const [showPast, setShowPast] = useState(false);
 
     // Grouping State
     const [groupedItems, setGroupedItems] = useState({
@@ -25,7 +24,6 @@ export const SavedScreen = ({ activeTab, onTabChange, onItemClick }) => {
         past: []
     });
 
-    // Simulate loading and group items
     useEffect(() => {
         if (savedItems) {
             setLoading(false);
@@ -33,7 +31,6 @@ export const SavedScreen = ({ activeTab, onTabChange, onItemClick }) => {
         }
     }, [savedItems]);
 
-    // Categorize Logic
     const categorizeItems = (items) => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -46,10 +43,7 @@ export const SavedScreen = ({ activeTab, onTabChange, onItemClick }) => {
         };
 
         items.forEach(item => {
-            // For mock data, we expect item.startTime
-            // If fetching from Supabase in the future, ensure it's mapped to startTime
             if (!item.startTime) {
-                // If no specific start time, treat as "Space" / "Place"
                 groups.spaces.push(item);
                 return;
             }
@@ -69,276 +63,312 @@ export const SavedScreen = ({ activeTab, onTabChange, onItemClick }) => {
         setGroupedItems(groups);
     };
 
-    // Filter Logic
-    const filterGroup = (group) => {
-        if (!searchQuery) return group;
-        return group.filter(item =>
-            item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (item.subtitle && item.subtitle.toLowerCase().includes(searchQuery.toLowerCase()))
-        );
-    };
-
     const handleDelete = (item) => {
-        // useActivity toggleSaveItem removes it if it exists
         toggleSaveItem(item);
     };
 
-    const handleShare = async (item) => {
-        if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: item.title,
-                    text: `¡Mira esto en UrbanMoop! ${item.title}`,
-                    url: window.location.href,
-                });
-            } catch (error) {
-                console.log('Error sharing:', error);
-            }
-        }
-    };
-
+    // Non-authenticated state
     if (!user) {
         return (
-            <div className="relative w-full h-[100dvh] bg-bg flex flex-col overflow-hidden font-sf text-text">
-                <div className="bg-bg/95 backdrop-blur-xl px-6 pt-12 pb-4 border-b border-border">
-                    <h1 className="text-3xl font-black text-brand-700 tracking-tight">Guardados</h1>
-                    <p className="text-sm text-muted font-medium mt-1">Tu colección personal</p>
-                </div>
-                <div className="flex-1 flex items-center justify-center px-6">
-                    <div className="text-center max-w-sm">
-                        <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-brand-50 flex items-center justify-center">
-                            <Heart size={40} className="text-brand-600" />
-                        </div>
-                        <h2 className="text-2xl font-black text-text mb-3">Inicia sesión</h2>
-                        <p className="text-sm text-muted mb-6">Guarda tus planes favoritos para no perderte nada.</p>
-                        <button onClick={() => setShowLoginModal(true)} className="w-full py-4 bg-brand-600 text-white rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-brand-500/30">
-                            <LogIn size={20} /> Iniciar Sesión
-                        </button>
+            <div className="relative w-full min-h-screen bg-[#0a0a0a] pb-24 font-sans">
+                <Header />
+                <div className="flex flex-col items-center justify-center px-6 pt-20">
+                    <div className="w-20 h-20 rounded-full bg-[#171717] flex items-center justify-center mb-6">
+                        <Bookmark size={32} className="text-gray-500" />
                     </div>
+                    <h3 className="text-xl font-bold text-white mb-2">Tu Agenda Viva</h3>
+                    <p className="text-gray-400 text-sm text-center mb-8">
+                        Inicia sesión para guardar eventos y acceder a tu agenda personal.
+                    </p>
+                    <button
+                        onClick={() => setShowLoginModal(true)}
+                        className="bg-white text-black font-bold px-8 py-3 rounded-xl"
+                    >
+                        Iniciar Sesión
+                    </button>
                 </div>
-                {showLoginModal && <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />}
                 <BottomNavigation currentView={activeTab} onNavigate={onTabChange} />
+                {showLoginModal && <LoginModal onClose={() => setShowLoginModal(false)} />}
             </div>
         );
     }
 
+    // Loading state
     if (loading) {
         return (
-            <div className="relative w-full h-[100dvh] bg-bg flex flex-col overflow-hidden font-sf text-text">
-                <div className="bg-bg/95 backdrop-blur-xl px-6 pt-12 pb-4 border-b border-border">
-                    <h1 className="text-3xl font-black text-brand-700 tracking-tight">Guardados</h1>
-                    <LoadingSpinner message="Organizando tus planes..." />
-                </div>
-                <BottomNavigation currentView={activeTab} onNavigate={onTabChange} />
+            <div className="relative w-full min-h-screen bg-[#0a0a0a] pb-24 font-sans flex items-center justify-center">
+                <LoadingSpinner />
             </div>
         );
     }
 
-    const filteredToday = filterGroup(groupedItems.today);
-    const filteredUpcoming = filterGroup(groupedItems.upcoming);
-    const filteredSpaces = filterGroup(groupedItems.spaces);
-    const filteredPast = filterGroup(groupedItems.past);
-
-    const hasNoResults = !filteredToday.length && !filteredUpcoming.length && !filteredSpaces.length && !filteredPast.length;
+    // Empty state
+    const isEmpty = groupedItems.today.length === 0 && groupedItems.upcoming.length === 0 && groupedItems.spaces.length === 0;
 
     return (
-        <div className="relative w-full h-[100dvh] bg-bg flex flex-col overflow-hidden font-sf text-text">
-            {/* Header */}
-            <div className="bg-bg/95 backdrop-blur-xl px-6 pt-12 pb-4 border-b border-border z-10">
-                <div className="flex items-center justify-between mb-4">
-                    <div>
-                        <h1 className="text-3xl font-black text-brand-700 tracking-tight">Guardados</h1>
-                        <p className="text-sm text-muted font-medium mt-1">
-                            {savedItems.length} planes en tu lista
-                        </p>
-                    </div>
-                    {/* Search Trigger */}
-                    <div className="relative">
-                        <input
-                            type="text"
-                            placeholder="Buscar..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-32 py-2 px-3 bg-surface rounded-full border border-border text-sm focus:w-40 transition-all focus:outline-none focus:ring-2 focus:ring-brand-500/50"
-                        />
-                        <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
-                    </div>
-                </div>
-            </div>
+        <div className="relative w-full min-h-screen bg-[#0a0a0a] pb-32 font-sans text-white">
+            {/* Sticky Header */}
+            <Header />
 
-            {/* List */}
-            <div className="flex-1 overflow-y-auto px-4 pb-32 space-y-8 pt-6">
+            <main className="max-w-2xl mx-auto">
+                {isEmpty ? (
+                    <EmptyState />
+                ) : (
+                    <>
+                        {/* HOY Section */}
+                        {groupedItems.today.length > 0 && (
+                            <section className="mt-4">
+                                <div className="flex items-center justify-between px-5 mb-3">
+                                    <h3 className="text-xs font-bold tracking-widest uppercase text-gray-500">Hoy</h3>
+                                    <span className="text-[10px] font-bold bg-blue-500/20 text-blue-500 px-2.5 py-1 rounded-full">
+                                        {groupedItems.today.length} Evento{groupedItems.today.length > 1 ? 's' : ''}
+                                    </span>
+                                </div>
 
-                {hasNoResults && (
-                    <div className="text-center py-20 opacity-50">
-                        <Heart size={48} className="mx-auto text-muted mb-4" />
-                        <p className="font-bold text-lg">Nada por aquí aún</p>
-                        <p className="text-sm">¡Explora y guarda planes!</p>
-                    </div>
-                )}
+                                {/* Featured Card for first item */}
+                                {groupedItems.today[0] && (
+                                    <FeaturedCard
+                                        item={groupedItems.today[0]}
+                                        onDelete={handleDelete}
+                                        onClick={() => onItemClick?.(groupedItems.today[0])}
+                                    />
+                                )}
 
-                {/* 1. SECCIÓN HOY (High Priority) */}
-                {filteredToday.length > 0 && (
-                    <section>
-                        <div className="flex items-center gap-2 mb-4 px-2">
-                            <span className="relative flex h-3 w-3">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                            </span>
-                            <h2 className="text-xl font-black text-text uppercase tracking-tight">Hoy</h2>
-                        </div>
-                        <div className="space-y-4">
-                            {filteredToday.map(item => (
-                                <div key={item.id} className="relative w-full bg-white rounded-3xl overflow-hidden shadow-lg border border-red-100 group">
-                                    <div className="h-48 relative">
-                                        <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-                                        <div className="absolute bottom-4 left-4 right-4 text-white">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <Zap size={14} className="text-yellow-400 fill-yellow-400" />
-                                                <span className="text-xs font-bold uppercase tracking-wide text-yellow-400">Ocurriendo ahora</span>
-                                            </div>
-                                            <h3 className="text-2xl font-black leading-none mb-1">{item.title}</h3>
-                                            <p className="text-sm text-gray-300 flex items-center gap-1">
-                                                <MapPin size={12} /> {item.distance}
-                                            </p>
+                                {/* Compact cards for remaining */}
+                                {groupedItems.today.slice(1).map(item => (
+                                    <CompactCard
+                                        key={item.id}
+                                        item={item}
+                                        onDelete={handleDelete}
+                                        onClick={() => onItemClick?.(item)}
+                                    />
+                                ))}
+                            </section>
+                        )}
+
+                        {/* PRÓXIMAMENTE Section */}
+                        {groupedItems.upcoming.length > 0 && (
+                            <section className="mt-8">
+                                <h3 className="text-xs font-bold tracking-widest uppercase px-5 mb-3 text-gray-500">Próximamente</h3>
+                                {groupedItems.upcoming.map(item => (
+                                    <CompactCard
+                                        key={item.id}
+                                        item={item}
+                                        onDelete={handleDelete}
+                                        onClick={() => onItemClick?.(item)}
+                                        showDate
+                                    />
+                                ))}
+                            </section>
+                        )}
+
+                        {/* LUGARES GUARDADOS Section */}
+                        {groupedItems.spaces.length > 0 && (
+                            <section className="mt-8">
+                                <h3 className="text-xs font-bold tracking-widest uppercase px-5 mb-3 text-gray-500">Lugares Guardados</h3>
+                                <div className="flex overflow-x-auto gap-3 px-4 pb-6 no-scrollbar snap-x">
+                                    {groupedItems.spaces.map(item => (
+                                        <PlaceCard
+                                            key={item.id}
+                                            item={item}
+                                            onDelete={handleDelete}
+                                        />
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+
+                        {/* EVENTOS PASADOS Button */}
+                        {groupedItems.past.length > 0 && (
+                            <div className="mt-2 px-4 mb-8">
+                                <button className="w-full flex items-center justify-between p-4 rounded-2xl bg-[#171717]/50 border border-transparent hover:border-white/10 transition-all group">
+                                    <div className="flex items-center gap-3">
+                                        <div className="bg-white/10 p-2 rounded-full">
+                                            <Clock size={20} className="text-gray-400" />
+                                        </div>
+                                        <div className="text-left">
+                                            <p className="font-bold text-sm text-white">Eventos Pasados</p>
+                                            <p className="text-xs text-gray-500">{groupedItems.past.length} guardados</p>
                                         </div>
                                     </div>
-                                    <div className="p-4 flex items-center gap-3">
-                                        <button
-                                            onClick={() => onItemClick && onItemClick(item.mapItem || item)} // Handle mock vs real structure
-                                            className="flex-1 bg-red-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-red-500/30 flex items-center justify-center gap-2 active:scale-95 transition-transform"
-                                        >
-                                            Ir ahora <ArrowRight size={16} />
-                                        </button>
-                                        <button onClick={() => handleDelete(item)} className="p-3 bg-gray-50 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
-                                            <Trash2 size={20} />
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
+                                    <ChevronRight size={20} className="text-gray-400 group-hover:translate-x-1 transition-transform" />
+                                </button>
+                            </div>
+                        )}
+                    </>
                 )}
-
-                {/* 2. SECCIÓN PRÓXIMAMENTE */}
-                {filteredUpcoming.length > 0 && (
-                    <section>
-                        <div className="flex items-center gap-2 mb-4 px-2">
-                            <Clock size={18} className="text-brand-500" />
-                            <h2 className="text-lg font-black text-text tracking-tight">Próximamente</h2>
-                        </div>
-                        <div className="space-y-3">
-                            {filteredUpcoming.map(item => (
-                                <div key={item.id} className="bg-white p-3 rounded-2xl flex gap-3 border border-gray-100 shadow-sm">
-                                    <div className="w-20 h-20 rounded-xl bg-gray-100 overflow-hidden flex-shrink-0">
-                                        <img src={item.image} className="w-full h-full object-cover" />
-                                    </div>
-                                    <div className="flex-1 flex flex-col justify-center">
-                                        <h3 className="font-bold text-text leading-tight mb-1 line-clamp-1">{item.title}</h3>
-                                        <p className="text-xs text-muted font-medium mb-2 flex items-center gap-1">
-                                            <Calendar size={10} />
-                                            {item.startTime ? new Date(item.startTime).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' }) : 'Pronto'}
-                                        </p>
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => onItemClick && onItemClick(item.mapItem || item)}
-                                                className="px-3 py-1.5 bg-brand-50 text-brand-700 text-xs font-bold rounded-lg"
-                                            >
-                                                Ver detalle
-                                            </button>
-                                            <button onClick={() => handleShare(item)} className="p-1.5 text-gray-400 hover:text-gray-600">
-                                                <Share2 size={14} />
-                                            </button>
-                                            <button onClick={() => handleDelete(item)} className="p-1.5 text-gray-400 hover:text-red-500">
-                                                <Trash2 size={14} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-                )}
-
-                {/* 3. SECCIÓN ESPACIOS (No Date) */}
-                {filteredSpaces.length > 0 && (
-                    <section>
-                        <div className="flex items-center gap-2 mb-4 px-2">
-                            <MapIcon size={18} className="text-blue-500" />
-                            <h2 className="text-lg font-black text-text tracking-tight">Lugares y Espacios</h2>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                            {filteredSpaces.map(item => (
-                                <div key={item.id} className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm flex flex-col">
-                                    <div className="h-28 bg-gray-100 relative">
-                                        <img src={item.image} className="w-full h-full object-cover" />
-                                        <button onClick={() => handleDelete(item)} className="absolute top-2 right-2 p-1.5 bg-black/40 backdrop-blur-md rounded-full text-white/80 hover:bg-red-500 hover:text-white transition-colors">
-                                            <Trash2 size={12} />
-                                        </button>
-                                    </div>
-                                    <div className="p-3 flex-1 flex flex-col justify-between">
-                                        <div>
-                                            <h3 className="font-bold text-sm text-text leading-tight mb-1 line-clamp-2">{item.title}</h3>
-                                            <p className="text-[10px] text-muted">{item.distance}</p>
-                                        </div>
-                                        <button
-                                            onClick={() => onItemClick && onItemClick(item.mapItem || item)}
-                                            className="mt-3 w-full py-1.5 bg-gray-50 text-gray-600 text-[10px] font-bold rounded-lg hover:bg-gray-100 transition-colors"
-                                        >
-                                            Ver espacio
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-                )}
-
-                {/* 4. SECCIÓN PASADO (Collapsed) */}
-                {filteredPast.length > 0 && (
-                    <section className="pt-4 border-t border-dashed border-gray-200">
-                        <button
-                            onClick={() => setShowPast(!showPast)}
-                            className="w-full flex items-center justify-between text-muted text-sm font-medium py-2 px-2 hover:bg-gray-50 rounded-lg transition-colors"
-                        >
-                            <span>⌛ Pasado ({filteredPast.length})</span>
-                            {showPast ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                        </button>
-
-                        <AnimatePresence>
-                            {showPast && (
-                                <motion.div
-                                    initial={{ height: 0, opacity: 0 }}
-                                    animate={{ height: 'auto', opacity: 1 }}
-                                    exit={{ height: 0, opacity: 0 }}
-                                    className="overflow-hidden"
-                                >
-                                    <div className="space-y-3 pt-2 opacity-60 grayscale hover:grayscale-0 transition-all">
-                                        {filteredPast.map(item => (
-                                            <div key={item.id} className="flex gap-3 p-2">
-                                                <div className="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden shrink-0">
-                                                    <img src={item.image} className="w-full h-full object-cover" />
-                                                </div>
-                                                <div className="flex-1">
-                                                    <h3 className="font-bold text-sm text-text">{item.title}</h3>
-                                                    <p className="text-xs text-muted">Finalizado</p>
-                                                </div>
-                                                <button onClick={() => handleDelete(item)} className="text-gray-400 hover:text-red-500">
-                                                    <Trash2 size={14} />
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </section>
-                )}
-
-            </div>
+            </main>
 
             <BottomNavigation currentView={activeTab} onNavigate={onTabChange} />
+            {showLoginModal && <LoginModal onClose={() => setShowLoginModal(false)} />}
         </div>
     );
 };
+
+// Header Component
+const Header = () => (
+    <div className="sticky top-0 z-50 bg-[#0a0a0a]/85 backdrop-blur-xl border-b border-white/5">
+        <div className="flex items-center px-5 justify-between h-16 max-w-2xl mx-auto">
+            <h2 className="text-2xl font-bold tracking-tight text-white">Guardados</h2>
+            <button className="flex items-center justify-center rounded-full h-10 w-10 hover:bg-white/10 transition-colors">
+                <Settings size={22} className="text-white" />
+            </button>
+        </div>
+    </div>
+);
+
+// Empty State
+const EmptyState = () => (
+    <div className="flex flex-col items-center justify-center px-6 pt-20">
+        <div className="w-20 h-20 rounded-full bg-[#171717] flex items-center justify-center mb-6">
+            <Bookmark size={32} className="text-gray-500" />
+        </div>
+        <h3 className="text-xl font-bold text-white mb-2">Nada guardado aún</h3>
+        <p className="text-gray-400 text-sm text-center">
+            Explora el mapa y guarda los eventos que te interesen.
+        </p>
+    </div>
+);
+
+// Featured Card (Large, for live/today events)
+const FeaturedCard = ({ item, onDelete, onClick }) => (
+    <div className="px-4 mb-4">
+        <div
+            onClick={onClick}
+            className="group relative rounded-3xl overflow-hidden bg-[#1e1e1e] shadow-lg border border-white/5 transition-transform active:scale-[0.99] cursor-pointer"
+        >
+            {/* Image */}
+            <div className="w-full h-48 bg-gray-800 relative">
+                <ImageWithFallback
+                    src={item.image || item.imageUrl}
+                    alt={item.title}
+                    className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+
+                {/* EN VIVO Badge */}
+                <div className="absolute top-3 left-3">
+                    <span className="bg-black/80 backdrop-blur text-red-500 text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
+                        <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                        </span>
+                        EN VIVO
+                    </span>
+                </div>
+
+                {/* Remove Button */}
+                <button
+                    onClick={(e) => { e.stopPropagation(); onDelete(item); }}
+                    className="absolute top-3 right-3 h-8 w-8 bg-black/20 hover:bg-red-500 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-colors"
+                >
+                    <X size={16} />
+                </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-4">
+                <div className="flex justify-between items-start mb-3">
+                    <div>
+                        <h4 className="text-lg font-bold leading-tight mb-1 text-white">{item.title}</h4>
+                        <p className="text-gray-400 text-sm flex items-center gap-1">
+                            {item.location || item.place || item.subtitle}
+                        </p>
+                    </div>
+                </div>
+                <div className="flex items-center gap-3">
+                    <div className="flex-1 bg-[#171717] rounded-xl px-3 py-2 flex items-center gap-2">
+                        <Clock size={16} className="text-blue-500" />
+                        <span className="text-xs font-medium text-blue-500">
+                            {item.time || 'Termina pronto'}
+                        </span>
+                    </div>
+                    <button className="flex-none bg-white text-black rounded-xl px-6 py-2 text-sm font-bold shadow-lg hover:opacity-90 transition-opacity">
+                        Ir ahora
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+);
+
+// Compact Card (List item style)
+const CompactCard = ({ item, onDelete, onClick, showDate }) => (
+    <div className="px-4 mb-2">
+        <div
+            onClick={onClick}
+            className="group flex gap-3 p-2 rounded-2xl bg-[#1e1e1e] shadow-lg border border-white/5 hover:border-blue-500/20 transition-all cursor-pointer"
+        >
+            {/* Thumbnail */}
+            <div className="h-24 w-24 aspect-square rounded-xl shrink-0 overflow-hidden relative bg-gray-800">
+                <ImageWithFallback
+                    src={item.image || item.imageUrl}
+                    alt={item.title}
+                    className="w-full h-full object-cover"
+                />
+                {showDate && (
+                    <div className="absolute bottom-1 left-1 right-1">
+                        <div className="bg-black/80 backdrop-blur rounded-lg py-1 flex flex-col items-center justify-center">
+                            <span className="text-[8px] font-bold uppercase text-gray-400">
+                                {new Date(item.startTime).toLocaleDateString('es', { weekday: 'short' })}
+                            </span>
+                            <span className="text-xs font-bold leading-none text-white">
+                                {new Date(item.startTime).getDate()}
+                            </span>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Content */}
+            <div className="flex flex-1 flex-col justify-between py-1 pr-1">
+                <div>
+                    <div className="flex justify-between items-start">
+                        <h4 className="text-base font-bold leading-tight text-white">{item.title}</h4>
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onDelete(item); }}
+                            className="text-gray-500 hover:text-red-500 transition-colors -mt-1 -mr-1 p-1"
+                        >
+                            <X size={16} />
+                        </button>
+                    </div>
+                    <p className="text-gray-500 text-xs mt-1">{item.location || item.place || item.subtitle}</p>
+                </div>
+                <div className="flex items-center justify-between mt-2">
+                    <p className="text-white text-xs font-bold">{item.time || ''}</p>
+                    <button className="bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors">
+                        {showDate ? 'Detalles' : 'Ver ticket'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+);
+
+// Place Card (Horizontal scroll)
+const PlaceCard = ({ item, onDelete }) => (
+    <div className="snap-center min-w-[200px] w-[200px] rounded-2xl bg-[#1e1e1e] shadow-lg border border-white/5 overflow-hidden flex flex-col group hover:-translate-y-1 transition-transform duration-300">
+        <div className="h-32 bg-gray-800 relative overflow-hidden">
+            <ImageWithFallback
+                src={item.image || item.imageUrl}
+                alt={item.title}
+                className="w-full h-full object-cover"
+            />
+            <button
+                onClick={() => onDelete(item)}
+                className="absolute top-2 right-2 h-7 w-7 bg-white/20 hover:bg-red-500 backdrop-blur rounded-full flex items-center justify-center text-white transition-colors"
+            >
+                <X size={14} />
+            </button>
+        </div>
+        <div className="p-3">
+            <h4 className="font-bold text-sm truncate text-white">{item.title}</h4>
+            <p className="text-[11px] text-gray-500 truncate mt-0.5">{item.location || item.place}</p>
+            <div className="mt-2 inline-flex items-center gap-1 bg-green-500/10 text-green-500 px-1.5 py-0.5 rounded text-[10px] font-bold">
+                Guardado
+            </div>
+        </div>
+    </div>
+);
+
+export default SavedScreen;
